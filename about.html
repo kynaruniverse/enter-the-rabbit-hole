@@ -4,48 +4,38 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- ======= Primary ======= -->
   <title>Enter the Rabbit Hole</title>
   <meta name="description" content="A surreal interactive experience. 16 endings. One secret. Thousands have entered. Most never find the bottom." />
 
-  <!-- ======= Open Graph ======= -->
-  <meta property="og:title"       content="Enter the Rabbit Hole" />
-  <meta property="og:description" content="A surreal interactive experience. 16 endings. One secret. Most never find the bottom." />
-  <meta property="og:type"        content="website" />
-  <meta property="og:image"       content="https://kynaruniverse.github.io/enter-the-rabbit-hole/preview.png" />
-  <meta property="og:url"         content="https://kynaruniverse.github.io/enter-the-rabbit-hole/about.html" />
+  <meta property="og:title"        content="Enter the Rabbit Hole" />
+  <meta property="og:description"  content="A surreal interactive experience. 16 endings. One secret. Most never find the bottom." />
+  <meta property="og:type"         content="website" />
+  <meta property="og:image"        content="https://kynaruniverse.github.io/enter-the-rabbit-hole/preview.png" />
+  <meta property="og:url"          content="https://kynaruniverse.github.io/enter-the-rabbit-hole/about.html" />
   <meta property="og:image:width"  content="1200" />
   <meta property="og:image:height" content="630" />
 
-  <!-- ======= Twitter ======= -->
   <meta name="twitter:card"        content="summary_large_image" />
   <meta name="twitter:title"       content="Enter the Rabbit Hole" />
-  <meta name="twitter:description" content="A surreal interactive experience. 16 endings. Can you find the secret?" />
+  <meta name="twitter:description" content="A surreal interactive experience. 16 endings. Can you find the secret? 🐇" />
   <meta name="twitter:image"       content="https://kynaruniverse.github.io/enter-the-rabbit-hole/preview.png" />
 
-  <!-- ======= PWA ======= -->
   <meta name="theme-color" content="#000000" />
 
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:     #000000;
-      --fg:     #ffffff;
+      --bg:     #000;
+      --fg:     #fff;
       --accent: #00ff99;
       --red:    #ff2244;
       --blue:   #2244ff;
-      --dim:    #333333;
+      --dim:    #333;
       --font:   'Courier New', Courier, monospace;
     }
 
-    html, body {
-      min-height: 100%;
-    }
+    html, body { min-height: 100%; }
 
     body {
       background: var(--bg);
@@ -54,8 +44,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      padding: 60px 20px 80px;
+      padding: 60px 20px 100px;
       min-height: 100dvh;
       overflow-x: hidden;
     }
@@ -67,19 +56,14 @@
       inset: 0;
       background: repeating-linear-gradient(
         to bottom,
-        transparent 0px,
-        transparent 3px,
-        rgba(0,0,0,0.1) 3px,
-        rgba(0,0,0,0.1) 4px
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px
       );
       pointer-events: none;
       z-index: 999;
     }
 
-    .container {
-      width: 100%;
-      max-width: 600px;
-    }
+    .container { width: 100%; max-width: 600px; }
 
     /* ---- Eyebrow ---- */
     .eyebrow {
@@ -88,26 +72,27 @@
       letter-spacing: 0.25em;
       margin-bottom: 20px;
       opacity: 0.7;
-      animation: fadeIn 1s ease both;
+      animation: fadeUp 1s ease both;
     }
 
     /* ---- Title ---- */
     .title {
-      font-size: clamp(1.8rem, 7vw, 3.2rem);
+      font-size: clamp(1.9rem, 7vw, 3.4rem);
       font-weight: 900;
       letter-spacing: 0.06em;
       line-height: 1.05;
       margin-bottom: 12px;
       text-transform: uppercase;
-      animation: fadeIn 1s ease 0.2s both;
+      animation: fadeUp 1s ease 0.15s both;
       position: relative;
+      overflow: hidden;
     }
 
     .title::before {
       content: attr(data-text);
       position: absolute;
+      inset: 0;
       left: 2px;
-      top: 0;
       color: var(--fg);
       text-shadow: -2px 0 var(--red);
       clip: rect(0, 900px, 40px, 0);
@@ -115,11 +100,11 @@
     }
 
     @keyframes glitch1 {
-      0%   { clip: rect(12px, 999px, 50px, 0); opacity: 0.8; }
-      25%  { clip: rect(60px, 999px, 80px, 0); opacity: 0.6; }
-      50%  { clip: rect(5px,  999px, 25px, 0); opacity: 0.8; }
-      75%  { clip: rect(40px, 999px, 65px, 0); opacity: 0.5; }
-      100% { clip: rect(12px, 999px, 50px, 0); opacity: 0.8; }
+      0%   { clip: rect(12px,999px,50px,0); opacity:.8; }
+      25%  { clip: rect(60px,999px,80px,0); opacity:.6; }
+      50%  { clip: rect(5px, 999px,25px,0); opacity:.8; }
+      75%  { clip: rect(40px,999px,65px,0); opacity:.5; }
+      100% { clip: rect(12px,999px,50px,0); opacity:.8; }
     }
 
     /* ---- Tagline ---- */
@@ -127,65 +112,142 @@
       font-size: 0.85rem;
       color: var(--dim);
       letter-spacing: 0.12em;
-      margin-bottom: 40px;
-      animation: fadeIn 1s ease 0.4s both;
+      margin-bottom: 36px;
+      animation: fadeUp 1s ease 0.3s both;
     }
 
     /* ---- Divider ---- */
     .divider {
       width: 100%;
       height: 1px;
-      background: #111;
+      background: linear-gradient(90deg, #111, transparent);
       margin-bottom: 36px;
-      animation: fadeIn 1s ease 0.5s both;
+      animation: fadeUp 1s ease 0.4s both;
     }
 
-    /* ---- Stats Row ---- */
-    .stats-row {
-      display: flex;
-      gap: 0;
-      margin-bottom: 40px;
-      animation: fadeIn 1s ease 0.6s both;
-      flex-wrap: wrap;
+    /* ---- Global Stats Hero ---- */
+    .stats-hero {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid #0d0d0d;
+      margin-bottom: 36px;
+      animation: fadeUp 1s ease 0.5s both;
+      position: relative;
+    }
+
+    /* gradient top border */
+    .stats-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--red), var(--accent), var(--blue));
     }
 
     .stat-box {
-      flex: 1;
-      min-width: 120px;
-      padding: 16px 0;
-      border: 1px solid #0d0d0d;
+      padding: 20px 10px;
       text-align: center;
+      border-right: 1px solid #0d0d0d;
     }
-
-    .stat-box + .stat-box {
-      border-left: none;
-    }
+    .stat-box:last-child { border-right: none; }
 
     .stat-number {
-      font-size: 1.4rem;
-      font-weight: 900;
-      color: var(--fg);
       display: block;
-      margin-bottom: 4px;
-      letter-spacing: 0.05em;
+      font-size: 1.6rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      margin-bottom: 5px;
+      transition: color 0.4s;
     }
-
-    .stat-number.accent { color: var(--accent); }
-    .stat-number.red    { color: var(--red);    }
+    .stat-number.loading { color: #222; }
+    .stat-number.green   { color: var(--accent); }
+    .stat-number.red     { color: var(--red); }
 
     .stat-label {
-      font-size: 0.55rem;
-      color: #333;
+      font-size: 0.52rem;
+      color: #2a2a2a;
       letter-spacing: 0.18em;
       text-transform: uppercase;
     }
 
-    /* ---- Teaser Text ---- */
-    .teaser {
+    /* ---- Live global stats table ---- */
+    .global-table {
+      border: 1px solid #0d0d0d;
       margin-bottom: 36px;
-      animation: fadeIn 1s ease 0.7s both;
+      animation: fadeUp 1s ease 0.6s both;
+      overflow: hidden;
     }
 
+    .global-table-header {
+      padding: 10px 16px;
+      border-bottom: 1px solid #0d0d0d;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .global-table-header span:first-child {
+      font-size: 0.55rem;
+      color: #2a2a2a;
+      letter-spacing: 0.2em;
+    }
+
+    .live-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+      margin-right: 6px;
+      animation: blink 2s infinite;
+    }
+
+    @keyframes blink {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.2; }
+    }
+
+    .live-label {
+      font-size: 0.5rem;
+      color: #222;
+      letter-spacing: 0.15em;
+      display: flex;
+      align-items: center;
+    }
+
+    .global-table-body {
+      padding: 4px 0;
+    }
+
+    .gtable-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 7px 16px;
+      border-bottom: 1px solid #080808;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      gap: 10px;
+    }
+    .gtable-row:last-child { border-bottom: none; }
+
+    .gtable-label { color: #2a2a2a; flex-shrink: 0; }
+    .gtable-value { color: var(--accent); text-align: right; }
+    .gtable-value.red    { color: var(--red); }
+    .gtable-value.secret { color: var(--red); letter-spacing: 0.15em; }
+
+    .loading-row {
+      padding: 14px 16px;
+      font-size: 0.6rem;
+      color: #1a1a1a;
+      letter-spacing: 0.15em;
+      text-align: center;
+    }
+
+    /* ---- Teaser ---- */
+    .teaser {
+      margin-bottom: 36px;
+      animation: fadeUp 1s ease 0.7s both;
+    }
     .teaser p {
       font-size: 0.85rem;
       color: #555;
@@ -193,24 +255,16 @@
       letter-spacing: 0.04em;
       margin-bottom: 14px;
     }
+    .teaser p.hi  { color: #888; }
+    .teaser p.red { color: var(--red); font-size: 0.75rem; letter-spacing: 0.1em; }
 
-    .teaser p.highlight {
-      color: #888;
-    }
-
-    .teaser p.red {
-      color: var(--red);
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
-    }
-
-    /* ---- Portals Preview ---- */
+    /* ---- Portal preview ---- */
     .portals-preview {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      margin-bottom: 40px;
-      animation: fadeIn 1s ease 0.8s both;
+      margin-bottom: 36px;
+      animation: fadeUp 1s ease 0.75s both;
     }
 
     .portal-row {
@@ -218,51 +272,114 @@
       align-items: center;
       gap: 12px;
       border: 1px solid #0d0d0d;
-      padding: 12px 16px;
+      padding: 13px 16px;
       font-size: 0.75rem;
       letter-spacing: 0.1em;
-      color: #333;
+      color: #2a2a2a;
       transition: border-color 0.3s, color 0.3s;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
     }
 
-    .portal-row:hover {
-      color: #666;
+    /* portal share bar showing global pick % */
+    .portal-bar {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      opacity: 0.04;
+      transition: width 0.8s ease;
+      pointer-events: none;
     }
 
-    .portal-row.red:hover  { border-color: #ff224422; color: var(--red);    }
-    .portal-row.blue:hover { border-color: #2244ff22; color: var(--blue);   }
-    .portal-row.gap:hover  { border-color: #00ff9922; color: var(--accent); }
+    .portal-row.red-p  .portal-bar { background: var(--red); }
+    .portal-row.blue-p .portal-bar { background: var(--blue); }
+    .portal-row.gap-p  .portal-bar { background: var(--accent); }
 
-    .portal-row .dot {
-      font-size: 0.9rem;
-      flex-shrink: 0;
+    .portal-row:hover { color: #666; }
+    .portal-row.red-p:hover  { border-color: rgba(255,34,68,0.15); }
+    .portal-row.blue-p:hover { border-color: rgba(34,68,255,0.15); }
+    .portal-row.gap-p:hover  { border-color: rgba(0,255,153,0.15); }
+
+    .portal-pct {
+      margin-left: auto;
+      font-size: 0.6rem;
+      color: #1a1a1a;
+      letter-spacing: 0.1em;
+      transition: color 0.4s;
     }
 
-    /* ---- Last Ending ---- */
-    .last-ending {
+    /* ---- Endings grid ---- */
+    .endings-section {
+      margin-bottom: 36px;
+      animation: fadeUp 1s ease 0.8s both;
+    }
+
+    .endings-label {
+      font-size: 0.55rem;
+      color: #222;
+      letter-spacing: 0.2em;
+      margin-bottom: 10px;
+    }
+
+    .endings-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+    }
+
+    .ending-cell {
+      border: 1px solid #080808;
+      padding: 9px 6px;
+      text-align: center;
+    }
+    .ending-cell.found { border-color: #141414; }
+
+    .ending-cell-title {
+      font-size: 0.48rem;
+      color: #111;
+      letter-spacing: 0.06em;
+      display: block;
+      margin-bottom: 3px;
+      line-height: 1.3;
+    }
+    .ending-cell.found .ending-cell-title  { color: #2a2a2a; }
+    .ending-cell.secret .ending-cell-title { color: #1a1a1a; font-style: italic; }
+
+    .ending-cell-bar { height: 1px; background: #0a0a0a; }
+    .ending-cell.found .ending-cell-bar { background: #1a1a1a; }
+
+    /* ---- Last ending ---- */
+    .last-ending-box {
       border: 1px solid #0d0d0d;
       padding: 14px 18px;
-      margin-bottom: 40px;
-      animation: fadeIn 1s ease 0.9s both;
+      margin-bottom: 36px;
+      animation: fadeUp 1s ease 0.85s both;
     }
 
     .last-ending-label {
-      font-size: 0.55rem;
-      color: #222;
+      font-size: 0.52rem;
+      color: #1a1a1a;
       letter-spacing: 0.2em;
       margin-bottom: 6px;
     }
 
-    .last-ending-value {
+    #last-ending-global {
       font-size: 0.8rem;
-      color: #444;
+      color: #333;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    #last-ending-local {
+      font-size: 0.65rem;
+      color: #1a1a1a;
       letter-spacing: 0.08em;
     }
 
     /* ---- CTA ---- */
     .cta-section {
-      animation: fadeIn 1s ease 1s both;
-      margin-bottom: 40px;
+      animation: fadeUp 1s ease 0.9s both;
+      margin-bottom: 36px;
     }
 
     .enter-btn {
@@ -270,122 +387,82 @@
       width: 100%;
       padding: 20px;
       background: transparent;
-      border: 1px solid var(--fg);
-      color: var(--fg);
+      border: 1px solid var(--accent);
+      color: var(--accent);
       font-family: var(--font);
       font-size: 1rem;
-      font-weight: bold;
-      letter-spacing: 0.2em;
+      font-weight: 900;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
       text-align: center;
       text-decoration: none;
       cursor: pointer;
-      transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
+      transition: background 0.2s, box-shadow 0.2s;
       margin-bottom: 12px;
+      position: relative;
+      overflow: hidden;
     }
 
+    .enter-btn::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; width: 60%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0,255,153,0.06), transparent);
+      transition: left 0.5s;
+    }
+    .enter-btn:hover::after { left: 150%; }
     .enter-btn:hover {
-      background: rgba(255,255,255,0.04);
-      box-shadow: 0 0 20px rgba(255,255,255,0.08);
-    }
-
-    .enter-btn.primary {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .enter-btn.primary:hover {
-      background: rgba(0,255,153,0.06);
-      box-shadow: 0 0 20px rgba(0,255,153,0.12);
+      background: rgba(0,255,153,0.05);
+      box-shadow: 0 0 24px rgba(0,255,153,0.12);
     }
 
     .cta-note {
-      font-size: 0.6rem;
-      color: #222;
+      font-size: 0.58rem;
+      color: #1a1a1a;
       letter-spacing: 0.15em;
       text-align: center;
     }
 
-    /* ---- Endings Teaser Grid ---- */
-    .endings-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-      margin-bottom: 40px;
-      animation: fadeIn 1s ease 0.85s both;
-    }
-
-    .ending-cell {
-      border: 1px solid #0a0a0a;
-      padding: 10px 8px;
-      text-align: center;
-    }
-
-    .ending-cell.found {
-      border-color: #1a1a1a;
-    }
-
-    .ending-cell-title {
-      font-size: 0.55rem;
+    /* ---- Ticker ---- */
+    .ticker {
+      font-size: 0.58rem;
       color: #1a1a1a;
-      letter-spacing: 0.1em;
-      display: block;
-      margin-bottom: 2px;
-    }
-
-    .ending-cell.found .ending-cell-title {
-      color: #333;
-    }
-
-    .ending-cell-bar {
-      height: 1px;
-      background: #0d0d0d;
-      margin-top: 4px;
+      letter-spacing: 0.12em;
+      margin-bottom: 36px;
+      min-height: 14px;
+      transition: opacity 0.5s;
+      animation: fadeUp 1s ease 0.95s both;
     }
 
     /* ---- Footer ---- */
     footer {
-      font-size: 0.55rem;
-      color: #1a1a1a;
+      font-size: 0.52rem;
+      color: #111;
       letter-spacing: 0.15em;
       text-align: center;
-      animation: fadeIn 1s ease 1.1s both;
+      animation: fadeUp 1s ease 1s both;
     }
 
     /* ---- Animations ---- */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ---- Ticker (live feel) ---- */
-    .ticker {
-      font-size: 0.6rem;
-      color: #1a1a1a;
-      letter-spacing: 0.15em;
-      margin-top: 8px;
-      min-height: 16px;
-      transition: color 0.5s;
-    }
-
-    .ticker.live { color: #333; }
-
     /* ---- Mobile ---- */
     @media (max-width: 420px) {
-      .stats-row { gap: 6px; }
-      .stat-box  { padding: 12px 0; }
-      .endings-grid { grid-template-columns: repeat(2, 1fr); }
+      body { padding: 36px 16px 80px; }
+      .stats-hero { grid-template-columns: repeat(3, 1fr); }
+      .stat-number { font-size: 1.2rem; }
+      .endings-grid { grid-template-columns: repeat(3, 1fr); }
     }
   </style>
 </head>
 <body>
-
 <div class="container">
 
-  <!-- Eyebrow -->
   <p class="eyebrow">[ transmission incoming ]</p>
 
-  <!-- Title -->
   <h1 class="title" data-text="ENTER THE RABBIT HOLE">
     ENTER THE<br>RABBIT HOLE
   </h1>
@@ -394,75 +471,96 @@
 
   <div class="divider"></div>
 
-  <!-- Stats -->
-  <div class="stats-row">
+  <!-- ============================
+       HERO STATS — live global
+       ============================ -->
+  <div class="stats-hero">
     <div class="stat-box">
-      <span class="stat-number" id="stat-entered">—</span>
+      <span class="stat-number loading" id="gs-total">—</span>
       <span class="stat-label">have entered</span>
     </div>
     <div class="stat-box">
-      <span class="stat-number accent" id="stat-endings">16</span>
+      <span class="stat-number green">16</span>
       <span class="stat-label">total endings</span>
     </div>
     <div class="stat-box">
-      <span class="stat-number red" id="stat-secret">—</span>
+      <span class="stat-number red loading" id="gs-secret">—</span>
       <span class="stat-label">found the secret</span>
     </div>
   </div>
 
-  <!-- Teaser -->
+  <!-- ============================
+       GLOBAL STATS TABLE — live
+       ============================ -->
+  <div class="global-table">
+    <div class="global-table-header">
+      <span>[ LIVE GLOBAL STATS ]</span>
+      <span class="live-label">
+        <span class="live-dot"></span>REAL PLAYERS
+      </span>
+    </div>
+    <div class="global-table-body" id="global-table-body">
+      <div class="loading-row">[ loading player data... ]</div>
+    </div>
+  </div>
+
+  <!-- ============================
+       TEASER TEXT
+       ============================ -->
   <div class="teaser">
-    <p class="highlight">
-      Three portals. Seven layers deep. One secret ending
-      that almost nobody finds.
-    </p>
-    <p>
-      Every choice triggers something. A glitch. A colour shift.
-      A message that wasn't meant for you. Characters appear
-      and disappear. The hole remembers who you are.
-    </p>
-    <p>
-      Some paths loop. Some dead-end. Some lead to rooms
-      that shouldn't exist at this depth.
-    </p>
-    <p class="red">
-      ⚠ There is no going back.
-    </p>
+    <p class="hi">Three portals. Seven layers deep. One secret ending that almost nobody finds.</p>
+    <p>Every choice triggers something. A glitch. A colour shift. A message that wasn't meant for you. Characters appear and disappear. The hole remembers who you are.</p>
+    <p>Some paths loop. Some dead-end. Some lead to rooms that shouldn't exist at this depth.</p>
+    <p class="red">⚠ There is no going back.</p>
   </div>
 
-  <!-- Portal preview -->
+  <!-- ============================
+       PORTAL ROWS — with global %
+       ============================ -->
   <div class="portals-preview">
-    <div class="portal-row red">
-      <span class="dot">🔴</span>
+    <div class="portal-row red-p">
+      <div class="portal-bar" id="bar-red"></div>
+      <span>🔴</span>
       <span>RED PORTAL — the path that burns</span>
+      <span class="portal-pct" id="pct-red">—%</span>
     </div>
-    <div class="portal-row blue">
-      <span class="dot">🔵</span>
+    <div class="portal-row blue-p">
+      <div class="portal-bar" id="bar-blue"></div>
+      <span>🔵</span>
       <span>BLUE DOOR — the hum becomes a voice</span>
+      <span class="portal-pct" id="pct-blue">—%</span>
     </div>
-    <div class="portal-row gap">
-      <span class="dot">⬛</span>
+    <div class="portal-row gap-p">
+      <div class="portal-bar" id="bar-gap"></div>
+      <span>⬛</span>
       <span>MYSTERIOUS GAP — it watches you back</span>
+      <span class="portal-pct" id="pct-gap">—%</span>
     </div>
   </div>
 
-  <!-- Endings teaser -->
-  <div class="endings-grid" id="endings-grid">
-    <!-- Populated by JS below -->
+  <!-- ============================
+       ENDINGS GRID — local found
+       ============================ -->
+  <div class="endings-section">
+    <p class="endings-label">[ YOUR ENDINGS FOUND ]</p>
+    <div class="endings-grid" id="endings-grid"></div>
   </div>
 
-  <!-- Last ending ticker -->
-  <div class="last-ending">
-    <p class="last-ending-label">[ LAST ENDING REACHED ON THIS DEVICE ]</p>
-    <p class="last-ending-value" id="last-ending-val">no record found</p>
+  <!-- ============================
+       LAST ENDING
+       ============================ -->
+  <div class="last-ending-box">
+    <p class="last-ending-label">[ LAST ENDING REACHED ]</p>
+    <p id="last-ending-global">globally: —</p>
+    <p id="last-ending-local">on this device: no record</p>
   </div>
 
-  <!-- CTA -->
+  <!-- ============================
+       CTA
+       ============================ -->
   <div class="cta-section">
-    <a class="enter-btn primary" href="index.html">
-      [ ENTER THE RABBIT HOLE ]
-    </a>
-    <p class="cta-note">works on mobile · no account needed · free</p>
+    <a class="enter-btn" href="index.html">[ ENTER THE RABBIT HOLE ]</a>
+    <p class="cta-note">works on mobile · no account needed · free · 🐇</p>
   </div>
 
   <!-- Ticker -->
@@ -470,131 +568,229 @@
 
   <div class="divider"></div>
 
-  <footer>
-    🐇 kynaruniverse.github.io/enter-the-rabbit-hole
-  </footer>
+  <footer>kynaruniverse.github.io/enter-the-rabbit-hole</footer>
 
 </div>
 
 <script>
 /* ============================================
-   PULL LOCAL STATS FROM LOCALSTORAGE
-   Same keys as stats.js and memory.js
+   about.html — inline script
+   Pulls from Supabase + localStorage
    ============================================ */
 
-const STATS_KEY  = 'rh_stats';
-const MEMORY_KEY = 'rh_memory';
+/* ---- Config (same as supabase.js) ---- */
+const SB_URL = 'YOUR_SUPABASE_URL';
+const SB_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SB_READY = SB_URL !== 'YOUR_SUPABASE_URL';
 
-function loadStats() {
-  try { return JSON.parse(localStorage.getItem(STATS_KEY)) || {}; }
-  catch { return {}; }
+const ENDING_NAMES = {
+  survived:  'YOU SURVIVED',
+  consumed:  'CONSUMED',
+  supposed:  'WERE SUPPOSED TO',
+  alone:     'THE ONLY ONE',
+  waited:    'THE WAITER',
+  floor:     'FLOOR OF DECISIONS',
+  looping:   'THE LOOP',
+  quiet:     'THE QUIET THING',
+  leaving:   'THE LEAVING',
+  observer:  'THE OBSERVER',
+  hollow:    'THE HOLLOW',
+  named:     'ON THE LIST',
+  free:      'ESCAPE',
+  npcSecret: '[ NPC SECRET ]',
+  secret:    '< CLASSIFIED >',
+  konami:    'THE BACK DOOR'
+};
+
+/* ---- Local data ---- */
+function localStats()  { try { return JSON.parse(localStorage.getItem('rh_stats'))  || {}; } catch { return {}; } }
+function localMemory() { try { return JSON.parse(localStorage.getItem('rh_memory')) || {}; } catch { return {}; } }
+
+/* ---- Supabase fetch ---- */
+async function fetchGlobalStats() {
+  if (!SB_READY) return null;
+  try {
+    const res = await fetch(SB_URL + '/rest/v1/global_stats?id=eq.1&select=*', {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+    });
+    if (!res.ok) return null;
+    const rows = await res.json();
+    return rows[0] || null;
+  } catch { return null; }
 }
 
-function loadMemory() {
-  try { return JSON.parse(localStorage.getItem(MEMORY_KEY)) || {}; }
-  catch { return {}; }
+/* ---- Populate hero stat numbers ---- */
+function setHeroStats(gs) {
+  const totalEl  = document.getElementById('gs-total');
+  const secretEl = document.getElementById('gs-secret');
+  if (gs) {
+    totalEl.textContent  = (gs.total_runs || 0).toLocaleString();
+    secretEl.textContent = (gs.secret_endings_found || 0).toLocaleString();
+  } else {
+    const local = localStats();
+    totalEl.textContent  = (local.totalRuns || 0).toLocaleString();
+    secretEl.textContent = '???';
+  }
+  totalEl.classList.remove('loading');
+  secretEl.classList.remove('loading');
 }
 
-/* ---- Populate stats ---- */
-(function populateStats() {
-  const stats  = loadStats();
-  const memory = loadMemory();
-
-  // Total runs (simulated global feel from local data + a base count)
-  // Once you have Supabase, replace this with a real API call
-  const BASE_GLOBAL = 1247; // bump this manually as you grow
-  const localRuns   = stats.totalRuns || 0;
-  const displayed   = BASE_GLOBAL + localRuns;
-
-  document.getElementById('stat-entered').textContent =
-    displayed.toLocaleString();
-
-  // Secret endings found (local)
-  const secretCount = (stats.endings && stats.endings.secret) || 0;
-  document.getElementById('stat-secret').textContent =
-    secretCount > 0 ? secretCount : '???';
-
-  // Last ending reached
-  const endingNames = {
-    survived:  'YOU SURVIVED',
-    consumed:  'CONSUMED',
-    supposed:  'YOU WERE SUPPOSED TO',
-    alone:     'THE ONLY ONE',
-    waited:    'THE ONE WHO WAITED',
-    floor:     'THE FLOOR OF DECISIONS',
-    looping:   'THE LOOP',
-    quiet:     'THE QUIET THING',
-    leaving:   'THE LEAVING',
-    observer:  'THE OBSERVER',
-    hollow:    'THE HOLLOW',
-    named:     'YOUR NAME IS ON THE LIST',
-    free:      'ESCAPE',
-    npcSecret: '[ CLASSIFIED ]',
-    secret:    '< CLASSIFIED >',
-    konami:    'THE BACK DOOR'
-  };
-
-  const found = (memory.endingsFound || []);
-  if (found.length > 0) {
-    const last = found[found.length - 1];
-    document.getElementById('last-ending-val').textContent =
-      endingNames[last] || last;
+/* ---- Populate global table ---- */
+function renderGlobalTable(gs) {
+  const body = document.getElementById('global-table-body');
+  if (!gs) {
+    body.innerHTML = '<div class="loading-row">[ configure supabase.js to see live stats ]</div>';
+    return;
   }
 
-  // Endings grid
-  const grid    = document.getElementById('endings-grid');
-  const allEnds = Object.keys(endingNames);
-  allEnds.forEach(type => {
-    const cell  = document.createElement('div');
-    const isFound = found.includes(type);
-    cell.className = 'ending-cell' + (isFound ? ' found' : '');
+  const pTotal = (gs.portal_red||0) + (gs.portal_blue||0) + (gs.portal_gap||0) + (gs.portal_fourth||0);
+  const pct    = n => pTotal > 0 ? Math.round((n/pTotal)*100) : 0;
+  const sp     = gs.total_runs > 0
+    ? ((gs.secret_endings_found||0) / gs.total_runs * 100).toFixed(2)
+    : '0.00';
 
-    const t = document.createElement('span');
-    t.className   = 'ending-cell-title';
-    t.textContent = isFound
-      ? (endingNames[type].length > 16 ? endingNames[type].slice(0,14) + '…' : endingNames[type])
-      : '███████████';
-
-    const bar = document.createElement('div');
-    bar.className = 'ending-cell-bar';
-
-    cell.appendChild(t);
-    cell.appendChild(bar);
-    grid.appendChild(cell);
-  });
-})();
-
-/* ---- Ticker — cycling cryptic messages ---- */
-(function startTicker() {
-  const messages = [
-    '[ someone just entered the red portal ]',
-    '[ an NPC was encountered moments ago ]',
-    '[ the fourth portal has been seen today ]',
-    '[ the secret ending remains unfound — mostly ]',
-    '[ the hole is waiting ]',
-    '[ 7 layers deep. most stop at 3. ]',
-    '[ your choices are already being tracked ]',
-    '[ ↑↑↓↓←→←→ means something ]',
-    '[ press J inside to open the journal ]',
-    '[ come back tomorrow. something changes. ]'
+  const rows = [
+    ['TOTAL PLAYERS ENTERED',   (gs.total_runs||0).toLocaleString(),          ''],
+    ['TOTAL ENDINGS REACHED',   (gs.total_endings||0).toLocaleString(),        ''],
+    ['RED PORTAL CHOSEN',       pct(gs.portal_red||0) + '%',                  ''],
+    ['BLUE DOOR CHOSEN',        pct(gs.portal_blue||0) + '%',                 ''],
+    ['MYSTERIOUS GAP CHOSEN',   pct(gs.portal_gap||0) + '%',                  ''],
+    ['SECRET ENDING FOUND',     (gs.secret_endings_found||0) + ' players (' + sp + '%)', 'secret'],
+    ['KONAMI CODE USED',        (gs.konami_found||0).toLocaleString() + ' players',     ''],
+    ['LAST ENDING (GLOBAL)',    gs.last_ending_type
+      ? (ENDING_NAMES[gs.last_ending_type] || gs.last_ending_type)
+      : '—',
+      gs.last_ending_type === 'secret' || gs.last_ending_type === 'konami' ? 'red' : ''],
   ];
 
-  const el = document.getElementById('ticker');
-  let i    = Math.floor(Math.random() * messages.length);
+  if ((gs.portal_fourth||0) > 0) {
+    rows.splice(5, 0, ['??? PORTAL CHOSEN', pct(gs.portal_fourth) + '%', '']);
+  }
+
+  body.innerHTML = rows.map(([label, value, cls]) =>
+    '<div class="gtable-row">' +
+      '<span class="gtable-label">' + label + '</span>' +
+      '<span class="gtable-value ' + cls + '">' + value + '</span>' +
+    '</div>'
+  ).join('');
+}
+
+/* ---- Portal % bars ---- */
+function renderPortalBars(gs) {
+  const pTotal = gs
+    ? (gs.portal_red||0) + (gs.portal_blue||0) + (gs.portal_gap||0) + (gs.portal_fourth||0)
+    : 0;
+  const pct    = (n) => pTotal > 0 ? Math.round((n/pTotal)*100) : 33;
+
+  const redPct  = gs ? pct(gs.portal_red||0)  : 33;
+  const bluePct = gs ? pct(gs.portal_blue||0) : 33;
+  const gapPct  = gs ? pct(gs.portal_gap||0)  : 33;
+
+  document.getElementById('bar-red').style.width  = redPct  + '%';
+  document.getElementById('bar-blue').style.width = bluePct + '%';
+  document.getElementById('bar-gap').style.width  = gapPct  + '%';
+
+  document.getElementById('pct-red').textContent  = redPct  + '%';
+  document.getElementById('pct-blue').textContent = bluePct + '%';
+  document.getElementById('pct-gap').textContent  = gapPct  + '%';
+
+  /* Fade pct labels in */
+  ['pct-red','pct-blue','pct-gap'].forEach(id => {
+    document.getElementById(id).style.color = '#333';
+  });
+}
+
+/* ---- Last ending rows ---- */
+function renderLastEnding(gs) {
+  const memory = localMemory();
+  const found  = memory.endingsFound || [];
+
+  if (gs && gs.last_ending_type) {
+    const isSecret = gs.last_ending_type === 'secret' || gs.last_ending_type === 'konami';
+    const el = document.getElementById('last-ending-global');
+    el.textContent = 'globally: ' + (ENDING_NAMES[gs.last_ending_type] || gs.last_ending_type);
+    if (isSecret) el.style.color = '#ff2244';
+  }
+
+  if (found.length > 0) {
+    const last = found[found.length - 1];
+    document.getElementById('last-ending-local').textContent =
+      'on this device: ' + (ENDING_NAMES[last] || last);
+  }
+}
+
+/* ---- Endings grid ---- */
+function renderEndingsGrid() {
+  const memory = localMemory();
+  const found  = memory.endingsFound || [];
+  const grid   = document.getElementById('endings-grid');
+  const allKeys = Object.keys(ENDING_NAMES);
+
+  grid.innerHTML = allKeys.map(type => {
+    const isFound  = found.includes(type);
+    const isSecret = type === 'secret' || type === 'konami' || type === 'npcSecret';
+    const name     = ENDING_NAMES[type];
+    const label    = isFound
+      ? (name.length > 13 ? name.slice(0,12) + '…' : name)
+      : (isSecret ? '░░░░░░░░░' : '███████████');
+    const cls = ['ending-cell', isFound ? 'found' : '', isSecret ? 'secret' : '']
+      .filter(Boolean).join(' ');
+    return '<div class="' + cls + '">' +
+      '<span class="ending-cell-title">' + label + '</span>' +
+      '<div class="ending-cell-bar"></div>' +
+    '</div>';
+  }).join('');
+}
+
+/* ---- Ticker ---- */
+function startTicker(gs) {
+  const staticMsgs = [
+    '[ the hole is waiting ]',
+    '[ ↑↑↓↓←→←→ means something ]',
+    '[ press J inside to open the journal ]',
+    '[ come back tomorrow. something changes. ]',
+    '[ 7 layers deep. most stop at 3. ]',
+    '[ the fourth portal appears 10% of visits ]',
+    '[ the hole remembers who you are ]',
+  ];
+
+  const liveMsgs = gs ? [
+    '[ ' + (gs.total_runs||0).toLocaleString() + ' players have entered ]',
+    '[ the secret has been found ' + (gs.secret_endings_found||0) + ' times ]',
+    '[ most players choose the red portal ]',
+    '[ last ending reached: ' +
+      (gs.last_ending_type ? (ENDING_NAMES[gs.last_ending_type] || gs.last_ending_type) : '—') +
+    ' ]',
+  ] : [];
+
+  const msgs = [...staticMsgs, ...liveMsgs];
+  const el   = document.getElementById('ticker');
+  let i = Math.floor(Math.random() * msgs.length);
 
   function show() {
     el.style.opacity = '0';
     setTimeout(() => {
-      el.textContent  = messages[i % messages.length];
-      el.classList.add('live');
+      el.textContent   = msgs[i % msgs.length];
       el.style.opacity = '1';
-      el.style.transition = 'opacity 0.8s';
+      el.style.transition = 'opacity 0.6s';
       i++;
-    }, 400);
+    }, 350);
   }
-
   show();
-  setInterval(show, 4000);
+  setInterval(show, 4200);
+}
+
+/* ---- Boot ---- */
+(async function boot() {
+  renderEndingsGrid();
+
+  const gs = await fetchGlobalStats();
+
+  setHeroStats(gs);
+  renderGlobalTable(gs);
+  renderPortalBars(gs);
+  renderLastEnding(gs);
+  startTicker(gs);
 })();
 </script>
 

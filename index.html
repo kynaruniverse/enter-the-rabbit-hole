@@ -7,11 +7,13 @@
   <title>Enter the Rabbit Hole</title>
   <meta name="description" content="A surreal interactive experience. Choose your portal. There is no going back." />
 
-  <meta property="og:title"       content="Enter the Rabbit Hole" />
-  <meta property="og:description" content="A surreal interactive experience. Choose your portal. There is no going back." />
-  <meta property="og:type"        content="website" />
-  <meta property="og:image"       content="https://kynaruniverse.github.io/enter-the-rabbit-hole/preview.png" />
-  <meta property="og:url"         content="https://kynaruniverse.github.io/enter-the-rabbit-hole/about.html" />
+  <meta property="og:title"        content="Enter the Rabbit Hole" />
+  <meta property="og:description"  content="A surreal interactive experience. 16 endings. One secret. Most never find the bottom." />
+  <meta property="og:type"         content="website" />
+  <meta property="og:image"        content="https://kynaruniverse.github.io/enter-the-rabbit-hole/preview.png" />
+  <meta property="og:url"          content="https://kynaruniverse.github.io/enter-the-rabbit-hole/about.html" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="630" />
 
   <meta name="twitter:card"        content="summary_large_image" />
   <meta name="twitter:title"       content="Enter the Rabbit Hole" />
@@ -27,9 +29,7 @@
 
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
-
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 </head>
 <body>
 
@@ -43,7 +43,6 @@
           ENTER THE RABBIT HOLE
         </h1>
         <p class="subtitle">Choose a portal to begin...</p>
-
         <div class="choices">
           <button class="portal-btn red-portal"  data-next="1" data-effect="glitchShake">
             <span class="portal-icon">🔴</span>
@@ -57,9 +56,7 @@
             <span class="portal-icon">⬛</span>
             <span class="portal-label">Mysterious Gap</span>
           </button>
-          <!-- Fourth portal injected here by script.js when it appears -->
         </div>
-
         <p class="warning-text">⚠ There is no going back.</p>
         <div id="landing-stats" class="landing-stats"></div>
       </div>
@@ -69,8 +66,8 @@
     <div id="node" class="page hidden">
       <div class="node-inner">
         <p class="layer-label" id="layer-label">[ layer 1 ]</p>
-        <p class="node-text" id="node-text"></p>
-        <div class="choices" id="node-choices"></div>
+        <p class="node-text"   id="node-text"></p>
+        <div class="choices"   id="node-choices"></div>
         <button class="back-btn" id="back-btn">↩ Retreat</button>
       </div>
     </div>
@@ -79,33 +76,31 @@
     <div id="ending" class="page hidden">
       <div class="ending-capture" id="ending-capture">
         <p class="eyebrow">[ end transmission ]</p>
-        <pre class="ending-text" id="ending-text"></pre>
-        <p class="ending-title"   id="ending-title"></p>
-        <p class="ending-subtext" id="ending-subtext"></p>
-        <p class="ending-watermark">🐇 entertherabbithole</p>
+        <pre class="ending-text"   id="ending-text"></pre>
+        <p  class="ending-title"   id="ending-title"></p>
+        <p  class="ending-subtext" id="ending-subtext"></p>
+        <p  class="ending-watermark">🐇 entertherabbithole</p>
       </div>
-
+      <!-- result-card-preview injected here by script.js -->
       <div class="ending-stats-bar" id="ending-stats-bar">
-        <div class="stat-item" id="stat-item-1"></div>
+        <div class="stat-item"    id="stat-item-1"></div>
         <div class="stat-divider">|</div>
-        <div class="stat-item" id="stat-item-2"></div>
+        <div class="stat-item"    id="stat-item-2"></div>
         <div class="stat-divider">|</div>
-        <div class="stat-item" id="stat-item-3"></div>
+        <div class="stat-item"    id="stat-item-3"></div>
       </div>
-
       <div class="ending-actions">
         <button class="action-btn"           id="share-btn">📸 Share Card</button>
         <button class="action-btn secondary" id="restart-btn">↩ Try Another Path</button>
       </div>
-
-      <p class="global-stats" id="global-stats"></p>
+      <div class="global-stats" id="global-stats"></div>
     </div>
 
   </div>
 
   <div id="scanlines"></div>
 
-  <!-- SCRIPTS — ORDER MATTERS -->
+  <!-- SCRIPTS — LOAD ORDER MATTERS, DO NOT REORDER -->
   <script src="nodes.js"></script>
   <script src="effects.js"></script>
   <script src="stats.js"></script>
@@ -113,15 +108,16 @@
   <script src="memory.js"></script>
   <script src="journal.js"></script>
   <script src="audio.js"></script>
+  <script src="supabase.js"></script>
+  <script src="cursor.js"></script>
   <script src="script.js"></script>
 
-  <!-- SERVICE WORKER -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker
           .register('/enter-the-rabbit-hole/sw.js')
-          .then(r => console.log('[SW] Registered:', r.scope))
+          .then(r  => console.log('[SW] Registered:', r.scope))
           .catch(e => console.warn('[SW] Failed:', e));
       });
     }
