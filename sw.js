@@ -8,7 +8,7 @@
    - On activate: clean up old caches
    ============================================ */
 
-const CACHE_NAME = 'rabbit-hole-v2';
+const CACHE_NAME = 'rabbit-hole-v3';
 
 const CORE_FILES = [
   '/enter-the-rabbit-hole/',

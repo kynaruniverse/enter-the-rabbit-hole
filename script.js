@@ -1,12 +1,12 @@
 /* ============================================
    ENTER THE RABBIT HOLE — script.js
-   Expansion: NPC Integration + Layer 4
+   Deep Expansion: Loop Detection
 
    Load order in index.html:
      1. nodes.js   (data + path tracker)
      2. effects.js (effect engine)
      3. stats.js   (stats tracking)
-     4. npcs.js    (NPC system)       ← NEW
+     4. npcs.js    (NPC system)
      5. script.js  (this file)
    ============================================ */
 
@@ -38,9 +38,29 @@ const shareBtn      = $('share-btn');
 /* ============================================
    STATE
    ============================================ */
-let nodeHistory   = [];
-let currentNodeId = null;
-let currentPortal = null;
+let nodeHistory    = [];
+let currentNodeId  = null;
+let currentPortal  = null;
+let visitedNodes   = new Set(); // for loop detection
+
+
+/* ============================================
+   LOOP DETECTION
+   If a node has been visited before this run,
+   we warp the intro text to acknowledge it.
+   ============================================ */
+
+const loopPrefixes = [
+  "You have been here before.\n\n",
+  "This place again.\n\n",
+  "The hole brought you back.\n\n",
+  "Familiar. Wrong. Continue.\n\n",
+  "Again. The same walls. Different you.\n\n"
+];
+
+function getLoopPrefix() {
+  return loopPrefixes[Math.floor(Math.random() * loopPrefixes.length)];
+}
 
 
 /* ============================================
@@ -58,14 +78,27 @@ function showLanding() {
   nodeHistory   = [];
   currentNodeId = null;
   currentPortal = null;
+  visitedNodes  = new Set();
   renderLandingStats();
   showPage(landingPage);
 }
 
 function showNode(node) {
+  const wasVisited = visitedNodes.has(node.id);
+
   layerLabel.textContent = `[ layer ${node.layer} ]`;
-  nodeText.textContent   = node.text;
-  nodeChoices.innerHTML  = '';
+
+  // If this is a dead end being revisited, add a loop prefix
+  if (wasVisited || node.isDeadEnd) {
+    nodeText.textContent = getLoopPrefix() + node.text;
+  } else {
+    nodeText.textContent = node.text;
+  }
+
+  // Mark as visited
+  visitedNodes.add(node.id);
+
+  nodeChoices.innerHTML = '';
 
   node.choices.forEach(choice => {
     const btn = document.createElement('button');
@@ -73,14 +106,8 @@ function showNode(node) {
 
     btn.addEventListener('click', async () => {
       setChoicesDisabled(true);
-
-      // 1. Fire the visual effect
       await triggerEffect(choice.effect);
-
-      // 2. Maybe show an NPC (Layers 2+ only, random chance)
       await maybeShowNPC(node.layer);
-
-      // 3. Navigate to next node
       navigateTo(choice.next);
     });
 
@@ -93,14 +120,12 @@ function showNode(node) {
 }
 
 function showEnding(node) {
-  // Check NPC secret ending FIRST
-  // Fires if any NPC appeared during this run AND we're hitting a real ending
-  // (not if we're already showing node 98 or 99)
+  // NPC secret ending check
   if (
     node.id !== 98 &&
     node.id !== 99 &&
     getNPCState().count >= 1 &&
-    Math.random() < 0.45  // 45% chance when NPC appeared — not guaranteed
+    Math.random() < 0.45
   ) {
     const npcEndingNode = nodes.find(n => n.id === 98);
     if (npcEndingNode) {
@@ -117,12 +142,17 @@ function _renderEnding(node) {
   recordEndingReached(node.endingType);
 
   endingTextEl.textContent  = node.text;
-  endingTitleEl.textContent = node.title || '';
+  endingTitleEl.textContent = node.title  || '';
   endingSubEl.textContent   = node.subtext || '';
+
+  // Show depth reached as flavour
+  const depth = nodeHistory.length + 1;
+  const loopsHit = [...nodeHistory]
+    .filter(id => nodes.find(n => n.id === id && n.isDeadEnd)).length;
 
   renderEndingStats(node.endingType);
 
-  // Special flair for secret endings
+  // Append depth info to global stats
   const isSecret = node.endingType === 'secret' || node.endingType === 'npcSecret';
   if (isSecret) {
     globalStats.style.color    = '#00ff99';
@@ -132,6 +162,25 @@ function _renderEnding(node) {
     globalStats.style.color    = '#444';
     globalStats.style.fontSize = '0.75rem';
   }
+
+  // Append descent stats
+  const depthNote = document.createElement('p');
+  depthNote.style.cssText = [
+    'font-size: 0.65rem',
+    'color: #2a2a2a',
+    'letter-spacing: 0.1em',
+    'margin-top: 8px'
+  ].join(';');
+  depthNote.textContent =
+    loopsHit > 0
+      ? `${depth} steps deep · ${loopsHit} loop${loopsHit > 1 ? 's' : ''} hit`
+      : `${depth} steps deep`;
+
+  // Only add once per ending display
+  const existingNote = endingPage.querySelector('.depth-note');
+  if (existingNote) existingNote.remove();
+  depthNote.classList.add('depth-note');
+  globalStats.after(depthNote);
 
   showPage(endingPage);
 }
@@ -144,7 +193,7 @@ function _renderEnding(node) {
 function navigateTo(nodeId) {
   recordPath(nodeId);
 
-  // Check choice-sequence secret ending
+  // Rare sequence secret ending
   if (checkRareSequence()) {
     const secretNode = nodes.find(n => n.id === 99);
     if (secretNode) {
@@ -156,7 +205,7 @@ function navigateTo(nodeId) {
 
   const node = nodes.find(n => n.id === nodeId);
   if (!node) {
-    console.warn(`Node ${nodeId} not found.`);
+    console.warn('Node not found:', nodeId);
     return;
   }
 
@@ -251,7 +300,7 @@ async function handleShare() {
               await navigator.share({
                 files: [file],
                 title: 'Enter the Rabbit Hole',
-                text: `I reached: "${endingName}" — Can you find the secret ending? 🐇`
+                text: `I reached: "${endingName}" after ${nodeHistory.length + 1} steps. Can you beat that? 🐇`
               });
               resetShareBtn();
               return;
@@ -283,7 +332,8 @@ function triggerDownload(canvas, endingName) {
 }
 
 function fallbackShare(endingName) {
-  const text = `I reached "${endingName}" in Enter the Rabbit Hole.\nCan you find all 10 endings? 🐇`;
+  const depth = nodeHistory.length + 1;
+  const text  = `I reached "${endingName}" after ${depth} steps in Enter the Rabbit Hole. Can you find all 14 endings? 🐇`;
   if (navigator.share) {
     navigator.share({ title: 'Enter the Rabbit Hole', text })
       .then(resetShareBtn)
@@ -295,7 +345,7 @@ function fallbackShare(endingName) {
 
 function copyToClipboard(text) {
   navigator.clipboard.writeText(text).then(() => {
-    shareBtn.textContent = '✓ Copied to clipboard!';
+    shareBtn.textContent = '✓ Copied!';
     setTimeout(resetShareBtn, 2500);
   }).catch(() => {
     shareBtn.textContent = '✗ Share manually';
