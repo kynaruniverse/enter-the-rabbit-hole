@@ -9,7 +9,7 @@
   <meta name="description" content="A surreal interactive experience. Choose your portal. There is no going back." />
   <meta name="author"      content="Enter the Rabbit Hole" />
 
-  <!-- ======= Open Graph (Discord, WhatsApp, Facebook) ======= -->
+  <!-- ======= Open Graph ======= -->
   <meta property="og:title"       content="Enter the Rabbit Hole" />
   <meta property="og:description" content="A surreal interactive experience. Choose your portal. There is no going back." />
   <meta property="og:type"        content="website" />
@@ -19,18 +19,17 @@
   <!-- ======= Twitter Card ======= -->
   <meta name="twitter:card"        content="summary_large_image" />
   <meta name="twitter:title"       content="Enter the Rabbit Hole" />
-  <meta name="twitter:description" content="A surreal interactive experience. Can you find the secret ending? 🐇" />
+  <meta name="twitter:description" content="A surreal interactive experience. Can you find all 10 endings? 🐇" />
   <meta name="twitter:image"       content="https://kynaruniverse.github.io/enter-the-rabbit-hole/preview.png" />
 
   <!-- ======= PWA ======= -->
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color"                content="#000000" />
-  <meta name="mobile-web-app-capable"     content="yes" />
+  <meta name="theme-color"                            content="#000000" />
+  <meta name="mobile-web-app-capable"                 content="yes" />
   <meta name="apple-mobile-web-app-capable"           content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style"  content="black-translucent" />
   <meta name="apple-mobile-web-app-title"             content="Rabbit Hole" />
 
-  <!-- PWA Icons -->
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png" />
@@ -38,7 +37,7 @@
   <!-- ======= Styles ======= -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- html2canvas — screenshot sharing -->
+  <!-- html2canvas -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 </head>
 <body>
@@ -78,13 +77,11 @@
         </div>
 
         <p class="warning-text">⚠ There is no going back.</p>
-
-        <!-- Portal pick stats (appears after first run) -->
         <div id="landing-stats" class="landing-stats"></div>
       </div>
     </div>
 
-    <!-- ========== NODE / CHOICE PAGE ========== -->
+    <!-- ========== NODE PAGE ========== -->
     <div id="node" class="page hidden">
       <div class="node-inner">
         <p class="layer-label" id="layer-label">[ layer 1 ]</p>
@@ -97,7 +94,6 @@
     <!-- ========== ENDING PAGE ========== -->
     <div id="ending" class="page hidden">
 
-      <!-- Screenshot capture zone -->
       <div class="ending-capture" id="ending-capture">
         <p class="eyebrow">[ end transmission ]</p>
         <pre class="ending-text" id="ending-text"></pre>
@@ -106,7 +102,6 @@
         <p class="ending-watermark">🐇 entertherabbithole</p>
       </div>
 
-      <!-- Stats bar -->
       <div class="ending-stats-bar" id="ending-stats-bar">
         <div class="stat-item" id="stat-item-1"></div>
         <div class="stat-divider">|</div>
@@ -115,7 +110,6 @@
         <div class="stat-item" id="stat-item-3"></div>
       </div>
 
-      <!-- Actions -->
       <div class="ending-actions">
         <button class="action-btn" id="share-btn">📸 Share Screenshot</button>
         <button class="action-btn secondary" id="restart-btn">↩ Try Another Path</button>
@@ -126,16 +120,16 @@
 
   </div><!-- /#app -->
 
-  <!-- Scanline overlay -->
   <div id="scanlines"></div>
 
-  <!-- ======= Scripts — order matters ======= -->
+  <!-- ======= Scripts — ORDER MATTERS ======= -->
   <script src="nodes.js"></script>
   <script src="effects.js"></script>
   <script src="stats.js"></script>
+  <script src="npcs.js"></script>
   <script src="script.js"></script>
 
-  <!-- ======= Service Worker Registration ======= -->
+  <!-- ======= Service Worker ======= -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

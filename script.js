@@ -1,12 +1,13 @@
 /* ============================================
    ENTER THE RABBIT HOLE — script.js
-   Phase 4: Main Logic + Stats Wired In
+   Expansion: NPC Integration + Layer 4
 
    Load order in index.html:
      1. nodes.js   (data + path tracker)
-     2. effects.js (effect engine + helpers)
-     3. stats.js   (stats tracking + render)
-     4. script.js  (this file — runs last)
+     2. effects.js (effect engine)
+     3. stats.js   (stats tracking)
+     4. npcs.js    (NPC system)       ← NEW
+     5. script.js  (this file)
    ============================================ */
 
 'use strict';
@@ -16,22 +17,22 @@
    ============================================ */
 const $ = id => document.getElementById(id);
 
-const landingPage  = $('landing');
-const nodePage     = $('node');
-const endingPage   = $('ending');
+const landingPage   = $('landing');
+const nodePage      = $('node');
+const endingPage    = $('ending');
 
-const layerLabel   = $('layer-label');
-const nodeText     = $('node-text');
-const nodeChoices  = $('node-choices');
+const layerLabel    = $('layer-label');
+const nodeText      = $('node-text');
+const nodeChoices   = $('node-choices');
 
 const endingTextEl  = $('ending-text');
 const endingTitleEl = $('ending-title');
 const endingSubEl   = $('ending-subtext');
 const globalStats   = $('global-stats');
 
-const backBtn      = $('back-btn');
-const restartBtn   = $('restart-btn');
-const shareBtn     = $('share-btn');
+const backBtn       = $('back-btn');
+const restartBtn    = $('restart-btn');
+const shareBtn      = $('share-btn');
 
 
 /* ============================================
@@ -39,7 +40,7 @@ const shareBtn     = $('share-btn');
    ============================================ */
 let nodeHistory   = [];
 let currentNodeId = null;
-let currentPortal = null; // 'red' | 'blue' | 'gap'
+let currentPortal = null;
 
 
 /* ============================================
@@ -53,6 +54,7 @@ function showPage(pageEl) {
 
 function showLanding() {
   resetPath();
+  resetNPCState();
   nodeHistory   = [];
   currentNodeId = null;
   currentPortal = null;
@@ -71,7 +73,14 @@ function showNode(node) {
 
     btn.addEventListener('click', async () => {
       setChoicesDisabled(true);
+
+      // 1. Fire the visual effect
       await triggerEffect(choice.effect);
+
+      // 2. Maybe show an NPC (Layers 2+ only, random chance)
+      await maybeShowNPC(node.layer);
+
+      // 3. Navigate to next node
       navigateTo(choice.next);
     });
 
@@ -84,18 +93,38 @@ function showNode(node) {
 }
 
 function showEnding(node) {
-  // Record stats before rendering
+  // Check NPC secret ending FIRST
+  // Fires if any NPC appeared during this run AND we're hitting a real ending
+  // (not if we're already showing node 98 or 99)
+  if (
+    node.id !== 98 &&
+    node.id !== 99 &&
+    getNPCState().count >= 1 &&
+    Math.random() < 0.45  // 45% chance when NPC appeared — not guaranteed
+  ) {
+    const npcEndingNode = nodes.find(n => n.id === 98);
+    if (npcEndingNode) {
+      currentNodeId = 98;
+      _renderEnding(npcEndingNode);
+      return;
+    }
+  }
+
+  _renderEnding(node);
+}
+
+function _renderEnding(node) {
   recordEndingReached(node.endingType);
 
   endingTextEl.textContent  = node.text;
   endingTitleEl.textContent = node.title || '';
   endingSubEl.textContent   = node.subtext || '';
 
-  // Render the 3-stat bar
   renderEndingStats(node.endingType);
 
-  // Secret ending extra flair
-  if (node.endingType === 'secret') {
+  // Special flair for secret endings
+  const isSecret = node.endingType === 'secret' || node.endingType === 'npcSecret';
+  if (isSecret) {
     globalStats.style.color    = '#00ff99';
     globalStats.style.fontSize = '0.9rem';
     setTimeout(() => triggerEffect('colorShiftFast'), 300);
@@ -115,7 +144,7 @@ function showEnding(node) {
 function navigateTo(nodeId) {
   recordPath(nodeId);
 
-  // Check rare sequence first
+  // Check choice-sequence secret ending
   if (checkRareSequence()) {
     const secretNode = nodes.find(n => n.id === 99);
     if (secretNode) {
@@ -160,18 +189,13 @@ function goBack() {
    LANDING — portal buttons
    ============================================ */
 
-const portalMap = {
-  '1': 'red',
-  '2': 'blue',
-  '3': 'gap'
-};
+const portalMap = { '1': 'red', '2': 'blue', '3': 'gap' };
 
 document.querySelectorAll('#landing .choices button').forEach(btn => {
   btn.addEventListener('click', async () => {
-    const effect  = btn.dataset.effect;
-    const nextId  = parseInt(btn.dataset.next, 10);
+    const effect = btn.dataset.effect;
+    const nextId = parseInt(btn.dataset.next, 10);
 
-    // Record which portal was picked
     currentPortal = portalMap[btn.dataset.next] || 'red';
     recordPortalPick(currentPortal);
 
@@ -189,7 +213,7 @@ document.querySelectorAll('#landing .choices button').forEach(btn => {
 
 
 /* ============================================
-   BACK + RESTART BUTTONS
+   BACK + RESTART
    ============================================ */
 
 backBtn.addEventListener('click', goBack);
@@ -197,7 +221,7 @@ restartBtn.addEventListener('click', showLanding);
 
 
 /* ============================================
-   SHARE BUTTON
+   SHARE
    ============================================ */
 
 shareBtn.addEventListener('click', handleShare);
@@ -219,7 +243,6 @@ async function handleShare() {
         logging: false
       });
 
-      // Try Web Share API with file (mobile)
       if (navigator.canShare) {
         canvas.toBlob(async blob => {
           const file = new File([blob], 'rabbit-hole.png', { type: 'image/png' });
@@ -232,7 +255,7 @@ async function handleShare() {
               });
               resetShareBtn();
               return;
-            } catch { /* fall through to download */ }
+            } catch { /* fall through */ }
           }
           triggerDownload(canvas, endingName);
         });
@@ -244,7 +267,6 @@ async function handleShare() {
       console.error('Screenshot error:', err);
       fallbackShare(endingName);
     }
-
   } else {
     fallbackShare(endingName);
   }
@@ -261,7 +283,7 @@ function triggerDownload(canvas, endingName) {
 }
 
 function fallbackShare(endingName) {
-  const text = `I reached "${endingName}" in Enter the Rabbit Hole.\nCan you find the secret ending? 🐇`;
+  const text = `I reached "${endingName}" in Enter the Rabbit Hole.\nCan you find all 10 endings? 🐇`;
   if (navigator.share) {
     navigator.share({ title: 'Enter the Rabbit Hole', text })
       .then(resetShareBtn)
@@ -276,7 +298,7 @@ function copyToClipboard(text) {
     shareBtn.textContent = '✓ Copied to clipboard!';
     setTimeout(resetShareBtn, 2500);
   }).catch(() => {
-    shareBtn.textContent = '✗ Copy failed — share manually';
+    shareBtn.textContent = '✗ Share manually';
     setTimeout(resetShareBtn, 3000);
   });
 }
