@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ======= Primary Meta ======= -->
+  <title>Enter the Rabbit Hole</title>
+  <meta name="description" content="A surreal interactive experience. Choose your portal. There is no going back." />
+  <meta name="author"      content="Enter the Rabbit Hole" />
+
+  <!-- ======= Open Graph (Discord, WhatsApp, Facebook) ======= -->
+  <meta property="og:title"       content="Enter the Rabbit Hole" />
+  <meta property="og:description" content="A surreal interactive experience. Choose your portal. There is no going back." />
+  <meta property="og:type"        content="website" />
+  <meta property="og:image"       content="https://kynaruniverse.github.io/enter-the-rabbit-hole/preview.png" />
+  <meta property="og:url"         content="https://kynaruniverse.github.io/enter-the-rabbit-hole/" />
+
+  <!-- ======= Twitter Card ======= -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="Enter the Rabbit Hole" />
+  <meta name="twitter:description" content="A surreal interactive experience. Can you find the secret ending? 🐇" />
+  <meta name="twitter:image"       content="https://kynaruniverse.github.io/enter-the-rabbit-hole/preview.png" />
+
+  <!-- ======= PWA ======= -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color"                content="#000000" />
+  <meta name="mobile-web-app-capable"     content="yes" />
+  <meta name="apple-mobile-web-app-capable"           content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style"  content="black-translucent" />
+  <meta name="apple-mobile-web-app-title"             content="Rabbit Hole" />
+
+  <!-- PWA Icons -->
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png" />
+
+  <!-- ======= Styles ======= -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- html2canvas — screenshot sharing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+</head>
+<body>
+
+  <div id="app">
+
+    <!-- ========== LANDING PAGE ========== -->
+    <div id="landing" class="page">
+      <div class="landing-inner">
+        <p class="eyebrow">[ transmission incoming ]</p>
+        <h1 class="title" id="glitch-title" data-text="ENTER THE RABBIT HOLE">
+          ENTER THE RABBIT HOLE
+        </h1>
+        <p class="subtitle">Choose a portal to begin...</p>
+
+        <div class="choices">
+          <button class="portal-btn red-portal"
+                  data-next="1"
+                  data-effect="glitchShake">
+            <span class="portal-icon">🔴</span>
+            <span class="portal-label">Red Portal</span>
+          </button>
+
+          <button class="portal-btn blue-portal"
+                  data-next="2"
+                  data-effect="colorShift">
+            <span class="portal-icon">🔵</span>
+            <span class="portal-label">Blue Door</span>
+          </button>
+
+          <button class="portal-btn gap-portal"
+                  data-next="3"
+                  data-effect="hiddenMessage">
+            <span class="portal-icon">⬛</span>
+            <span class="portal-label">Mysterious Gap</span>
+          </button>
+        </div>
+
+        <p class="warning-text">⚠ There is no going back.</p>
+
+        <!-- Portal pick stats (appears after first run) -->
+        <div id="landing-stats" class="landing-stats"></div>
+      </div>
+    </div>
+
+    <!-- ========== NODE / CHOICE PAGE ========== -->
+    <div id="node" class="page hidden">
+      <div class="node-inner">
+        <p class="layer-label" id="layer-label">[ layer 1 ]</p>
+        <p class="node-text" id="node-text"></p>
+        <div class="choices" id="node-choices"></div>
+        <button class="back-btn" id="back-btn">↩ Retreat</button>
+      </div>
+    </div>
+
+    <!-- ========== ENDING PAGE ========== -->
+    <div id="ending" class="page hidden">
+
+      <!-- Screenshot capture zone -->
+      <div class="ending-capture" id="ending-capture">
+        <p class="eyebrow">[ end transmission ]</p>
+        <pre class="ending-text" id="ending-text"></pre>
+        <p class="ending-title" id="ending-title"></p>
+        <p class="ending-subtext" id="ending-subtext"></p>
+        <p class="ending-watermark">🐇 entertherabbithole</p>
+      </div>
+
+      <!-- Stats bar -->
+      <div class="ending-stats-bar" id="ending-stats-bar">
+        <div class="stat-item" id="stat-item-1"></div>
+        <div class="stat-divider">|</div>
+        <div class="stat-item" id="stat-item-2"></div>
+        <div class="stat-divider">|</div>
+        <div class="stat-item" id="stat-item-3"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="ending-actions">
+        <button class="action-btn" id="share-btn">📸 Share Screenshot</button>
+        <button class="action-btn secondary" id="restart-btn">↩ Try Another Path</button>
+      </div>
+
+      <p class="global-stats" id="global-stats"></p>
+    </div>
+
+  </div><!-- /#app -->
+
+  <!-- Scanline overlay -->
+  <div id="scanlines"></div>
+
+  <!-- ======= Scripts — order matters ======= -->
+  <script src="nodes.js"></script>
+  <script src="effects.js"></script>
+  <script src="stats.js"></script>
+  <script src="script.js"></script>
+
+  <!-- ======= Service Worker Registration ======= -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('/enter-the-rabbit-hole/sw.js')
+          .then(reg => console.log('[SW] Registered:', reg.scope))
+          .catch(err => console.warn('[SW] Failed:', err));
+      });
+    }
+  </script>
+
+</body>
+</html>

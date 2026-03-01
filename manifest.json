@@ -1,0 +1,25 @@
+{
+  "name": "Enter the Rabbit Hole",
+  "short_name": "Rabbit Hole",
+  "description": "A surreal interactive experience. Choose your portal. There is no going back.",
+  "start_url": "/enter-the-rabbit-hole/",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

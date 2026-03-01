@@ -1,0 +1,469 @@
+/* ============================================
+   ENTER THE RABBIT HOLE — style.css
+   Phase 5: Final Polish
+   ============================================ */
+
+/* ---------- Reset & Base ---------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:        #000000;
+  --fg:        #ffffff;
+  --accent:    #00ff99;
+  --red:       #ff2244;
+  --blue:      #2244ff;
+  --dim:       #444444;
+  --font-main: 'Courier New', Courier, monospace;
+}
+
+html {
+  height: 100%;
+  /* Prevent text size adjust on mobile rotation */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-main);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100%;
+  min-height: 100dvh; /* dynamic viewport for mobile */
+  padding: 40px 20px 60px;
+  overflow-x: hidden;
+  /* Prevent pull-to-refresh interfering with effects */
+  overscroll-behavior: none;
+}
+
+/* ---------- Scanline Overlay ---------- */
+#scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.12) 3px,
+    rgba(0, 0, 0, 0.12) 4px
+  );
+  z-index: 999;
+  transition: opacity 0.3s;
+}
+
+/* ---------- App Wrapper ---------- */
+#app {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+}
+
+/* ---------- Pages ---------- */
+.page {
+  width: 100%;
+  text-align: center;
+  animation: fadeIn 0.5s ease;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Eyebrow ---------- */
+.eyebrow {
+  font-size: 0.7rem;
+  color: var(--accent);
+  letter-spacing: 0.22em;
+  margin-bottom: 14px;
+  opacity: 0.75;
+}
+
+/* ---------- Landing Title + CSS Glitch ---------- */
+.title {
+  font-size: clamp(1.6rem, 5.5vw, 2.8rem);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  margin-bottom: 18px;
+  position: relative;
+  text-transform: uppercase;
+  /* Prevent glitch layers overflowing on small screens */
+  overflow: hidden;
+}
+
+.title::before,
+.title::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+}
+
+.title::before {
+  left: 2px;
+  text-shadow: -2px 0 var(--red);
+  clip: rect(24px, 550px, 90px, 0);
+  animation: glitch-1 3.5s infinite linear;
+}
+
+.title::after {
+  left: -2px;
+  text-shadow: -2px 0 var(--blue), 2px 2px var(--accent);
+  clip: rect(85px, 550px, 140px, 0);
+  animation: glitch-2 3.5s infinite linear;
+}
+
+@keyframes glitch-1 {
+  0%   { clip: rect(12px, 999px, 60px, 0);  transform: skew(0.4deg); }
+  20%  { clip: rect(78px, 999px, 100px, 0); transform: skew(0deg); }
+  40%  { clip: rect(3px,  999px, 30px, 0);  transform: skew(0.2deg); }
+  60%  { clip: rect(55px, 999px, 80px, 0);  transform: skew(0deg); }
+  80%  { clip: rect(20px, 999px, 50px, 0);  transform: skew(0.3deg); }
+  100% { clip: rect(12px, 999px, 60px, 0);  transform: skew(0.4deg); }
+}
+
+@keyframes glitch-2 {
+  0%   { clip: rect(90px, 999px, 120px, 0); transform: skew(-0.3deg); }
+  25%  { clip: rect(40px, 999px, 70px, 0);  transform: skew(0deg); }
+  50%  { clip: rect(10px, 999px, 35px, 0);  transform: skew(-0.2deg); }
+  75%  { clip: rect(65px, 999px, 95px, 0);  transform: skew(0deg); }
+  100% { clip: rect(90px, 999px, 120px, 0); transform: skew(-0.3deg); }
+}
+
+/* ---------- Subtitle ---------- */
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--dim);
+  margin-bottom: 36px;
+  letter-spacing: 0.12em;
+}
+
+/* ---------- Choices Container ---------- */
+.choices {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+/* ---------- Portal Buttons ---------- */
+.portal-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 340px;
+  padding: 16px 22px;
+  background: #080808;
+  color: var(--fg);
+  border: 1px solid #222;
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: border-color 0.25s, background 0.25s, transform 0.15s, box-shadow 0.25s;
+  /* Larger tap target on mobile */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.portal-btn:active {
+  transform: scale(0.97);
+}
+
+.portal-btn:hover {
+  background: #111;
+  transform: scale(1.03);
+}
+
+.red-portal:hover,  .red-portal:focus-visible  { border-color: var(--red);    box-shadow: 0 0 16px rgba(255,34,68,0.35); }
+.blue-portal:hover, .blue-portal:focus-visible  { border-color: #4466ff;       box-shadow: 0 0 16px rgba(34,68,255,0.35); }
+.gap-portal:hover,  .gap-portal:focus-visible   { border-color: var(--accent);  box-shadow: 0 0 16px rgba(0,255,153,0.25); }
+
+.portal-btn:focus-visible {
+  outline: none;
+}
+
+.portal-icon  { font-size: 1.1rem; flex-shrink: 0; }
+.portal-label { flex: 1; text-align: left; }
+
+/* ---------- Warning Text ---------- */
+.warning-text {
+  font-size: 0.65rem;
+  color: #2a2a2a;
+  letter-spacing: 0.18em;
+  margin-top: 8px;
+}
+
+/* ---------- Node Page ---------- */
+.node-inner {
+  padding: 10px 0 20px;
+}
+
+.layer-label {
+  font-size: 0.65rem;
+  color: var(--accent);
+  letter-spacing: 0.22em;
+  margin-bottom: 22px;
+  opacity: 0.7;
+}
+
+.node-text {
+  font-size: 1rem;
+  line-height: 1.9;
+  color: #bbb;
+  margin-bottom: 34px;
+  min-height: 80px;
+  white-space: pre-line;
+  transition: opacity 0.2s;
+}
+
+/* ---------- Node Choice Buttons ---------- */
+#node-choices button {
+  width: 100%;
+  max-width: 340px;
+  padding: 15px 22px;
+  background: #080808;
+  color: var(--fg);
+  border: 1px solid #222;
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+#node-choices button:hover {
+  border-color: var(--accent);
+  background: #0d0d0d;
+  transform: scale(1.02);
+  box-shadow: 0 0 12px rgba(0,255,153,0.15);
+}
+
+#node-choices button:active {
+  transform: scale(0.97);
+}
+
+#node-choices button:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+}
+
+#node-choices button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---------- Back Button ---------- */
+.back-btn {
+  margin-top: 22px;
+  background: transparent;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  padding: 8px 0;
+}
+
+.back-btn:hover {
+  color: #888;
+}
+
+/* ---------- Ending Page ---------- */
+.ending-capture {
+  padding: 24px 10px 16px;
+  margin-bottom: 6px;
+}
+
+.ending-text {
+  font-size: clamp(0.55rem, 1.8vw, 0.85rem);
+  line-height: 1.35;
+  color: var(--accent);
+  white-space: pre;
+  overflow-x: auto;
+  margin: 16px auto;
+  text-align: left;
+  display: inline-block;
+  max-width: 100%;
+  /* Scrollable on very small screens without breaking layout */
+  scrollbar-width: none;
+}
+
+.ending-text::-webkit-scrollbar {
+  display: none;
+}
+
+.ending-title {
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  color: #555;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+.ending-subtext {
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 14px;
+  letter-spacing: 0.08em;
+  line-height: 1.6;
+}
+
+.ending-watermark {
+  font-size: 0.55rem;
+  color: #1a1a1a;
+  letter-spacing: 0.2em;
+  margin-top: 20px;
+}
+
+/* ---------- Ending Actions ---------- */
+.ending-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.action-btn {
+  width: 100%;
+  max-width: 300px;
+  padding: 15px 22px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: opacity 0.2s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.action-btn:hover   { opacity: 0.85; transform: scale(1.02); }
+.action-btn:active  { transform: scale(0.97); }
+.action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.action-btn.secondary {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid #333;
+}
+
+.action-btn.secondary:hover { border-color: #666; }
+
+/* ---------- Global Stats ---------- */
+.global-stats {
+  font-size: 0.7rem;
+  color: #444;
+  letter-spacing: 0.1em;
+  padding-bottom: 20px;
+}
+
+/* ---------- Effect Classes (JS-applied) ---------- */
+.glitch-shake {
+  animation: shakeAnim 0.45s ease;
+}
+
+@keyframes shakeAnim {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  15%  { transform: translate(-5px, 3px) rotate(-0.5deg); }
+  30%  { transform: translate(5px, -3px) rotate(0.5deg); }
+  45%  { transform: translate(-4px, 4px) rotate(-0.3deg); }
+  60%  { transform: translate(4px, -2px) rotate(0.3deg); }
+  75%  { transform: translate(-2px, 2px) rotate(0deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.invert-flash {
+  animation: invertFlash 0.5s ease;
+}
+
+@keyframes invertFlash {
+  0%   { filter: none; }
+  30%  { filter: invert(1); }
+  60%  { filter: none; }
+  80%  { filter: invert(0.4); }
+  100% { filter: none; }
+}
+
+/* ---------- Focus Visible (Keyboard nav) ---------- */
+:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ---------- Selection Color ---------- */
+::selection {
+  background: var(--accent);
+  color: #000;
+}
+
+/* ---------- Scrollbar (desktop) ---------- */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+
+/* ---------- Reduced Motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Mobile (max 420px) ---------- */
+@media (max-width: 420px) {
+  body {
+    padding: 28px 14px 50px;
+  }
+
+  .title {
+    font-size: 1.45rem;
+  }
+
+  .portal-btn,
+  #node-choices button,
+  .action-btn {
+    max-width: 100%;
+  }
+
+  .node-text {
+    font-size: 0.92rem;
+  }
+
+  .ending-text {
+    font-size: 0.5rem;
+  }
+}
+
+/* ---------- Tall phones (safe area for notch/home bar) ---------- */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  }
+}
