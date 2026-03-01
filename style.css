@@ -436,6 +436,33 @@ body {
   }
 }
 
+/* ---------- Fourth Portal ---------- */
+.fourth-portal {
+  border-color: #2a002a;
+  animation: fourthFlicker 4s infinite;
+}
+.fourth-portal:hover {
+  border-color: #9900ff;
+  box-shadow: 0 0 18px rgba(153,0,255,0.4);
+}
+@keyframes fourthFlicker {
+  0%,100% { opacity: 1; border-color: #2a002a; }
+  92%     { opacity: 1; }
+  93%     { opacity: 0.3; border-color: #9900ff; }
+  94%     { opacity: 1; }
+  97%     { opacity: 0.7; }
+  98%     { opacity: 1; }
+}
+
+/* ---------- Pressure Timer ---------- */
+#pressure-timer {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  font-family: var(--font-main);
+  margin-top: 16px;
+  transition: color 0.3s;
+}
+
 /* ---------- Mobile (max 420px) ---------- */
 @media (max-width: 420px) {
   body {

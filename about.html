@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ======= Primary ======= -->
+  <title>Enter the Rabbit Hole</title>
+  <meta name="description" content="A surreal interactive experience. 16 endings. One secret. Thousands have entered. Most never find the bottom." />
+
+  <!-- ======= Open Graph ======= -->
+  <meta property="og:title"       content="Enter the Rabbit Hole" />
+  <meta property="og:description" content="A surreal interactive experience. 16 endings. One secret. Most never find the bottom." />
+  <meta property="og:type"        content="website" />
+  <meta property="og:image"       content="https://kynaruniverse.github.io/enter-the-rabbit-hole/preview.png" />
+  <meta property="og:url"         content="https://kynaruniverse.github.io/enter-the-rabbit-hole/about.html" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <!-- ======= Twitter ======= -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="Enter the Rabbit Hole" />
+  <meta name="twitter:description" content="A surreal interactive experience. 16 endings. Can you find the secret?" />
+  <meta name="twitter:image"       content="https://kynaruniverse.github.io/enter-the-rabbit-hole/preview.png" />
+
+  <!-- ======= PWA ======= -->
+  <meta name="theme-color" content="#000000" />
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg:     #000000;
+      --fg:     #ffffff;
+      --accent: #00ff99;
+      --red:    #ff2244;
+      --blue:   #2244ff;
+      --dim:    #333333;
+      --font:   'Courier New', Courier, monospace;
+    }
+
+    html, body {
+      min-height: 100%;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 60px 20px 80px;
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    /* Scanlines */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.1) 3px,
+        rgba(0,0,0,0.1) 4px
+      );
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+    }
+
+    /* ---- Eyebrow ---- */
+    .eyebrow {
+      font-size: 0.65rem;
+      color: var(--accent);
+      letter-spacing: 0.25em;
+      margin-bottom: 20px;
+      opacity: 0.7;
+      animation: fadeIn 1s ease both;
+    }
+
+    /* ---- Title ---- */
+    .title {
+      font-size: clamp(1.8rem, 7vw, 3.2rem);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      line-height: 1.05;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      animation: fadeIn 1s ease 0.2s both;
+      position: relative;
+    }
+
+    .title::before {
+      content: attr(data-text);
+      position: absolute;
+      left: 2px;
+      top: 0;
+      color: var(--fg);
+      text-shadow: -2px 0 var(--red);
+      clip: rect(0, 900px, 40px, 0);
+      animation: glitch1 4s infinite linear;
+    }
+
+    @keyframes glitch1 {
+      0%   { clip: rect(12px, 999px, 50px, 0); opacity: 0.8; }
+      25%  { clip: rect(60px, 999px, 80px, 0); opacity: 0.6; }
+      50%  { clip: rect(5px,  999px, 25px, 0); opacity: 0.8; }
+      75%  { clip: rect(40px, 999px, 65px, 0); opacity: 0.5; }
+      100% { clip: rect(12px, 999px, 50px, 0); opacity: 0.8; }
+    }
+
+    /* ---- Tagline ---- */
+    .tagline {
+      font-size: 0.85rem;
+      color: var(--dim);
+      letter-spacing: 0.12em;
+      margin-bottom: 40px;
+      animation: fadeIn 1s ease 0.4s both;
+    }
+
+    /* ---- Divider ---- */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: #111;
+      margin-bottom: 36px;
+      animation: fadeIn 1s ease 0.5s both;
+    }
+
+    /* ---- Stats Row ---- */
+    .stats-row {
+      display: flex;
+      gap: 0;
+      margin-bottom: 40px;
+      animation: fadeIn 1s ease 0.6s both;
+      flex-wrap: wrap;
+    }
+
+    .stat-box {
+      flex: 1;
+      min-width: 120px;
+      padding: 16px 0;
+      border: 1px solid #0d0d0d;
+      text-align: center;
+    }
+
+    .stat-box + .stat-box {
+      border-left: none;
+    }
+
+    .stat-number {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--fg);
+      display: block;
+      margin-bottom: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-number.accent { color: var(--accent); }
+    .stat-number.red    { color: var(--red);    }
+
+    .stat-label {
+      font-size: 0.55rem;
+      color: #333;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    /* ---- Teaser Text ---- */
+    .teaser {
+      margin-bottom: 36px;
+      animation: fadeIn 1s ease 0.7s both;
+    }
+
+    .teaser p {
+      font-size: 0.85rem;
+      color: #555;
+      line-height: 1.9;
+      letter-spacing: 0.04em;
+      margin-bottom: 14px;
+    }
+
+    .teaser p.highlight {
+      color: #888;
+    }
+
+    .teaser p.red {
+      color: var(--red);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+    }
+
+    /* ---- Portals Preview ---- */
+    .portals-preview {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 40px;
+      animation: fadeIn 1s ease 0.8s both;
+    }
+
+    .portal-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid #0d0d0d;
+      padding: 12px 16px;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      color: #333;
+      transition: border-color 0.3s, color 0.3s;
+    }
+
+    .portal-row:hover {
+      color: #666;
+    }
+
+    .portal-row.red:hover  { border-color: #ff224422; color: var(--red);    }
+    .portal-row.blue:hover { border-color: #2244ff22; color: var(--blue);   }
+    .portal-row.gap:hover  { border-color: #00ff9922; color: var(--accent); }
+
+    .portal-row .dot {
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    /* ---- Last Ending ---- */
+    .last-ending {
+      border: 1px solid #0d0d0d;
+      padding: 14px 18px;
+      margin-bottom: 40px;
+      animation: fadeIn 1s ease 0.9s both;
+    }
+
+    .last-ending-label {
+      font-size: 0.55rem;
+      color: #222;
+      letter-spacing: 0.2em;
+      margin-bottom: 6px;
+    }
+
+    .last-ending-value {
+      font-size: 0.8rem;
+      color: #444;
+      letter-spacing: 0.08em;
+    }
+
+    /* ---- CTA ---- */
+    .cta-section {
+      animation: fadeIn 1s ease 1s both;
+      margin-bottom: 40px;
+    }
+
+    .enter-btn {
+      display: block;
+      width: 100%;
+      padding: 20px;
+      background: transparent;
+      border: 1px solid var(--fg);
+      color: var(--fg);
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: bold;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
+      margin-bottom: 12px;
+    }
+
+    .enter-btn:hover {
+      background: rgba(255,255,255,0.04);
+      box-shadow: 0 0 20px rgba(255,255,255,0.08);
+    }
+
+    .enter-btn.primary {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .enter-btn.primary:hover {
+      background: rgba(0,255,153,0.06);
+      box-shadow: 0 0 20px rgba(0,255,153,0.12);
+    }
+
+    .cta-note {
+      font-size: 0.6rem;
+      color: #222;
+      letter-spacing: 0.15em;
+      text-align: center;
+    }
+
+    /* ---- Endings Teaser Grid ---- */
+    .endings-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 40px;
+      animation: fadeIn 1s ease 0.85s both;
+    }
+
+    .ending-cell {
+      border: 1px solid #0a0a0a;
+      padding: 10px 8px;
+      text-align: center;
+    }
+
+    .ending-cell.found {
+      border-color: #1a1a1a;
+    }
+
+    .ending-cell-title {
+      font-size: 0.55rem;
+      color: #1a1a1a;
+      letter-spacing: 0.1em;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .ending-cell.found .ending-cell-title {
+      color: #333;
+    }
+
+    .ending-cell-bar {
+      height: 1px;
+      background: #0d0d0d;
+      margin-top: 4px;
+    }
+
+    /* ---- Footer ---- */
+    footer {
+      font-size: 0.55rem;
+      color: #1a1a1a;
+      letter-spacing: 0.15em;
+      text-align: center;
+      animation: fadeIn 1s ease 1.1s both;
+    }
+
+    /* ---- Animations ---- */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---- Ticker (live feel) ---- */
+    .ticker {
+      font-size: 0.6rem;
+      color: #1a1a1a;
+      letter-spacing: 0.15em;
+      margin-top: 8px;
+      min-height: 16px;
+      transition: color 0.5s;
+    }
+
+    .ticker.live { color: #333; }
+
+    /* ---- Mobile ---- */
+    @media (max-width: 420px) {
+      .stats-row { gap: 6px; }
+      .stat-box  { padding: 12px 0; }
+      .endings-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Eyebrow -->
+  <p class="eyebrow">[ transmission incoming ]</p>
+
+  <!-- Title -->
+  <h1 class="title" data-text="ENTER THE RABBIT HOLE">
+    ENTER THE<br>RABBIT HOLE
+  </h1>
+
+  <p class="tagline">a surreal interactive experience</p>
+
+  <div class="divider"></div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-box">
+      <span class="stat-number" id="stat-entered">—</span>
+      <span class="stat-label">have entered</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-number accent" id="stat-endings">16</span>
+      <span class="stat-label">total endings</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-number red" id="stat-secret">—</span>
+      <span class="stat-label">found the secret</span>
+    </div>
+  </div>
+
+  <!-- Teaser -->
+  <div class="teaser">
+    <p class="highlight">
+      Three portals. Seven layers deep. One secret ending
+      that almost nobody finds.
+    </p>
+    <p>
+      Every choice triggers something. A glitch. A colour shift.
+      A message that wasn't meant for you. Characters appear
+      and disappear. The hole remembers who you are.
+    </p>
+    <p>
+      Some paths loop. Some dead-end. Some lead to rooms
+      that shouldn't exist at this depth.
+    </p>
+    <p class="red">
+      ⚠ There is no going back.
+    </p>
+  </div>
+
+  <!-- Portal preview -->
+  <div class="portals-preview">
+    <div class="portal-row red">
+      <span class="dot">🔴</span>
+      <span>RED PORTAL — the path that burns</span>
+    </div>
+    <div class="portal-row blue">
+      <span class="dot">🔵</span>
+      <span>BLUE DOOR — the hum becomes a voice</span>
+    </div>
+    <div class="portal-row gap">
+      <span class="dot">⬛</span>
+      <span>MYSTERIOUS GAP — it watches you back</span>
+    </div>
+  </div>
+
+  <!-- Endings teaser -->
+  <div class="endings-grid" id="endings-grid">
+    <!-- Populated by JS below -->
+  </div>
+
+  <!-- Last ending ticker -->
+  <div class="last-ending">
+    <p class="last-ending-label">[ LAST ENDING REACHED ON THIS DEVICE ]</p>
+    <p class="last-ending-value" id="last-ending-val">no record found</p>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <a class="enter-btn primary" href="index.html">
+      [ ENTER THE RABBIT HOLE ]
+    </a>
+    <p class="cta-note">works on mobile · no account needed · free</p>
+  </div>
+
+  <!-- Ticker -->
+  <p class="ticker" id="ticker"></p>
+
+  <div class="divider"></div>
+
+  <footer>
+    🐇 kynaruniverse.github.io/enter-the-rabbit-hole
+  </footer>
+
+</div>
+
+<script>
+/* ============================================
+   PULL LOCAL STATS FROM LOCALSTORAGE
+   Same keys as stats.js and memory.js
+   ============================================ */
+
+const STATS_KEY  = 'rh_stats';
+const MEMORY_KEY = 'rh_memory';
+
+function loadStats() {
+  try { return JSON.parse(localStorage.getItem(STATS_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function loadMemory() {
+  try { return JSON.parse(localStorage.getItem(MEMORY_KEY)) || {}; }
+  catch { return {}; }
+}
+
+/* ---- Populate stats ---- */
+(function populateStats() {
+  const stats  = loadStats();
+  const memory = loadMemory();
+
+  // Total runs (simulated global feel from local data + a base count)
+  // Once you have Supabase, replace this with a real API call
+  const BASE_GLOBAL = 1247; // bump this manually as you grow
+  const localRuns   = stats.totalRuns || 0;
+  const displayed   = BASE_GLOBAL + localRuns;
+
+  document.getElementById('stat-entered').textContent =
+    displayed.toLocaleString();
+
+  // Secret endings found (local)
+  const secretCount = (stats.endings && stats.endings.secret) || 0;
+  document.getElementById('stat-secret').textContent =
+    secretCount > 0 ? secretCount : '???';
+
+  // Last ending reached
+  const endingNames = {
+    survived:  'YOU SURVIVED',
+    consumed:  'CONSUMED',
+    supposed:  'YOU WERE SUPPOSED TO',
+    alone:     'THE ONLY ONE',
+    waited:    'THE ONE WHO WAITED',
+    floor:     'THE FLOOR OF DECISIONS',
+    looping:   'THE LOOP',
+    quiet:     'THE QUIET THING',
+    leaving:   'THE LEAVING',
+    observer:  'THE OBSERVER',
+    hollow:    'THE HOLLOW',
+    named:     'YOUR NAME IS ON THE LIST',
+    free:      'ESCAPE',
+    npcSecret: '[ CLASSIFIED ]',
+    secret:    '< CLASSIFIED >',
+    konami:    'THE BACK DOOR'
+  };
+
+  const found = (memory.endingsFound || []);
+  if (found.length > 0) {
+    const last = found[found.length - 1];
+    document.getElementById('last-ending-val').textContent =
+      endingNames[last] || last;
+  }
+
+  // Endings grid
+  const grid    = document.getElementById('endings-grid');
+  const allEnds = Object.keys(endingNames);
+  allEnds.forEach(type => {
+    const cell  = document.createElement('div');
+    const isFound = found.includes(type);
+    cell.className = 'ending-cell' + (isFound ? ' found' : '');
+
+    const t = document.createElement('span');
+    t.className   = 'ending-cell-title';
+    t.textContent = isFound
+      ? (endingNames[type].length > 16 ? endingNames[type].slice(0,14) + '…' : endingNames[type])
+      : '███████████';
+
+    const bar = document.createElement('div');
+    bar.className = 'ending-cell-bar';
+
+    cell.appendChild(t);
+    cell.appendChild(bar);
+    grid.appendChild(cell);
+  });
+})();
+
+/* ---- Ticker — cycling cryptic messages ---- */
+(function startTicker() {
+  const messages = [
+    '[ someone just entered the red portal ]',
+    '[ an NPC was encountered moments ago ]',
+    '[ the fourth portal has been seen today ]',
+    '[ the secret ending remains unfound — mostly ]',
+    '[ the hole is waiting ]',
+    '[ 7 layers deep. most stop at 3. ]',
+    '[ your choices are already being tracked ]',
+    '[ ↑↑↓↓←→←→ means something ]',
+    '[ press J inside to open the journal ]',
+    '[ come back tomorrow. something changes. ]'
+  ];
+
+  const el = document.getElementById('ticker');
+  let i    = Math.floor(Math.random() * messages.length);
+
+  function show() {
+    el.style.opacity = '0';
+    setTimeout(() => {
+      el.textContent  = messages[i % messages.length];
+      el.classList.add('live');
+      el.style.opacity = '1';
+      el.style.transition = 'opacity 0.8s';
+      i++;
+    }, 400);
+  }
+
+  show();
+  setInterval(show, 4000);
+})();
+</script>
+
+</body>
+</html>

@@ -1635,6 +1635,44 @@ The hole knows.`,
   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
     `,
     subtext: "🐇 You are one of the few. Screenshot this."
+  },
+
+  /* ==========================================
+     NODE 100 — KONAMI SECRET ENDING
+     Triggered by: Up Up Down Down Left Right
+     Left Right B A on landing page keyboard
+     ========================================== */
+
+  {
+    id: 100,
+    layer: 7,
+    ending: true,
+    endingType: 'konami',
+    title: 'THE BACK DOOR',
+    text: [
+      '',
+      '  ╔══════════════════════════════════╗',
+      '  ║                                  ║',
+      '  ║   Some doors are not             ║',
+      '  ║   in the walls.                  ║',
+      '  ║                                  ║',
+      '  ║   They are in the fingers.       ║',
+      '  ║   In the sequence.               ║',
+      '  ║   In the muscle memory           ║',
+      '  ║   of people who played games     ║',
+      '  ║   before the games knew          ║',
+      '  ║   they were being played.        ║',
+      '  ║                                  ║',
+      '  ║   You remembered the code.       ║',
+      '  ║                                  ║',
+      '  ║   The hole was impressed.        ║',
+      '  ║   In whatever way holes          ║',
+      '  ║   can be impressed.              ║',
+      '  ║                                  ║',
+      '  ╚══════════════════════════════════╝',
+      ''
+    ].join('\n'),
+    subtext: '🐇 ↑↑↓↓←→←→ You knew the code. Now you know the hole.'
   }
 
 ];

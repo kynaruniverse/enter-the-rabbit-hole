@@ -1,35 +1,35 @@
 /* ============================================
    ENTER THE RABBIT HOLE — script.js
-   Deep Expansion: Loop Detection
+   All 12 Features Wired
 
    Load order in index.html:
-     1. nodes.js   (data + path tracker)
-     2. effects.js (effect engine)
-     3. stats.js   (stats tracking)
-     4. npcs.js    (NPC system)
-     5. script.js  (this file)
+     1. nodes.js
+     2. effects.js
+     3. stats.js
+     4. npcs.js
+     5. memory.js
+     6. journal.js
+     7. audio.js
+     8. script.js  ← this file
    ============================================ */
 
 'use strict';
 
 /* ============================================
-   DOM REFERENCES
+   DOM
    ============================================ */
 const $ = id => document.getElementById(id);
 
 const landingPage   = $('landing');
 const nodePage      = $('node');
 const endingPage    = $('ending');
-
 const layerLabel    = $('layer-label');
 const nodeText      = $('node-text');
 const nodeChoices   = $('node-choices');
-
 const endingTextEl  = $('ending-text');
 const endingTitleEl = $('ending-title');
 const endingSubEl   = $('ending-subtext');
 const globalStats   = $('global-stats');
-
 const backBtn       = $('back-btn');
 const restartBtn    = $('restart-btn');
 const shareBtn      = $('share-btn');
@@ -38,28 +38,144 @@ const shareBtn      = $('share-btn');
 /* ============================================
    STATE
    ============================================ */
-let nodeHistory    = [];
-let currentNodeId  = null;
-let currentPortal  = null;
-let visitedNodes   = new Set(); // for loop detection
+let nodeHistory   = [];
+let currentNodeId = null;
+let currentPortal = null;
+let visitedNodes  = new Set();
+let currentDepth  = 0;
 
 
 /* ============================================
-   LOOP DETECTION
-   If a node has been visited before this run,
-   we warp the intro text to acknowledge it.
+   LOOP DETECTION PREFIXES
    ============================================ */
-
 const loopPrefixes = [
-  "You have been here before.\n\n",
-  "This place again.\n\n",
-  "The hole brought you back.\n\n",
-  "Familiar. Wrong. Continue.\n\n",
-  "Again. The same walls. Different you.\n\n"
+  'You have been here before.\n\n',
+  'This place again.\n\n',
+  'The hole brought you back.\n\n',
+  'Familiar. Wrong. Continue.\n\n',
+  'Again. The same walls. Different you.\n\n'
 ];
-
 function getLoopPrefix() {
   return loopPrefixes[Math.floor(Math.random() * loopPrefixes.length)];
+}
+
+
+/* ============================================
+   ENDING CODE GENERATOR
+   Produces a unique 6-char code per run
+   Based on path fingerprint
+   ============================================ */
+function generateEndingCode(endingType, pathArr) {
+  const seed   = endingType + pathArr.join('');
+  const chars  = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let hash     = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+    hash |= 0;
+  }
+  let code = 'RH-';
+  let h    = Math.abs(hash);
+  for (let i = 0; i < 4; i++) {
+    code += chars[h % chars.length];
+    h = Math.floor(h / chars.length) + (i * 17);
+  }
+  return code;
+}
+
+
+/* ============================================
+   SHAREABLE RESULT CARD
+   Generates a styled canvas card for sharing
+   ============================================ */
+async function generateResultCard(endingType, endingTitle, code, depth, loopsHit) {
+  const canvas  = document.createElement('canvas');
+  canvas.width  = 800;
+  canvas.height = 420;
+  const ctx     = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, 800, 420);
+
+  // Border
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth   = 1;
+  ctx.strokeRect(20, 20, 760, 380);
+
+  // Inner border
+  ctx.strokeStyle = '#0d0d0d';
+  ctx.strokeRect(28, 28, 744, 364);
+
+  // Accent line top
+  ctx.fillStyle = '#00ff99';
+  ctx.fillRect(20, 20, 760, 2);
+
+  // Header
+  ctx.font      = '12px "Courier New"';
+  ctx.fillStyle = '#00ff9966';
+  ctx.fillText('[ END TRANSMISSION ]', 44, 58);
+
+  // Ending title
+  ctx.font      = 'bold 28px "Courier New"';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(endingTitle, 44, 110);
+
+  // Ending code
+  ctx.font      = '14px "Courier New"';
+  ctx.fillStyle = '#ff2244';
+  ctx.fillText(code, 44, 146);
+
+  // Divider
+  ctx.fillStyle = '#111111';
+  ctx.fillRect(44, 164, 712, 1);
+
+  // Stats row
+  ctx.font      = '12px "Courier New"';
+  ctx.fillStyle = '#444444';
+  ctx.fillText(`${depth} STEPS DEEP`, 44, 192);
+  ctx.fillText(`${loopsHit} LOOP${loopsHit !== 1 ? 'S' : ''} HIT`, 220, 192);
+  ctx.fillText(`LAYER 7 REACHED`, 360, 192);
+
+  // Divider
+  ctx.fillStyle = '#111111';
+  ctx.fillRect(44, 208, 712, 1);
+
+  // Subtext / flavour
+  ctx.font      = '13px "Courier New"';
+  ctx.fillStyle = '#333333';
+  const flavourMap = {
+    survived:  'The path that resists is the only honest one.',
+    consumed:  'Some paths only go one way.',
+    looping:   'The rabbit hole does not end. It simply restarts.',
+    observer:  'You did not enter the rabbit hole. It entered you.',
+    quiet:     'Some people avoid the quiet their whole lives.',
+    free:      'The exit was always there. You had to go deep enough.',
+    secret:    'One in thousands follows the exact path.',
+    konami:    'Some doors are not in the walls. They are in the fingers.',
+    npcSecret: 'The hole has a memory. Now it remembers you.'
+  };
+  const flavour = flavourMap[endingType] || 'The rabbit hole has no bottom.';
+  ctx.fillText(flavour, 44, 242);
+
+  // ASCII rabbit
+  ctx.font      = '11px "Courier New"';
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillText('(\\  /)', 44, 330);
+  ctx.fillText('( o.o)', 44, 346);
+  ctx.fillText('> ^ <',  44, 362);
+
+  // Watermark
+  ctx.font      = '11px "Courier New"';
+  ctx.fillStyle = '#1a1a1a';
+  ctx.textAlign = 'right';
+  ctx.fillText('kynaruniverse.github.io/enter-the-rabbit-hole', 756, 376);
+  ctx.textAlign = 'left';
+
+  // Bottom accent
+  ctx.fillStyle = '#ff224422';
+  ctx.fillRect(20, 398, 760, 2);
+
+  return canvas;
 }
 
 
@@ -70,6 +186,7 @@ function getLoopPrefix() {
 function showPage(pageEl) {
   [landingPage, nodePage, endingPage].forEach(p => p.classList.add('hidden'));
   pageEl.classList.remove('hidden');
+  soundTransition();
 }
 
 function showLanding() {
@@ -79,38 +196,47 @@ function showLanding() {
   currentNodeId = null;
   currentPortal = null;
   visitedNodes  = new Set();
+  currentDepth  = 0;
+
+  applyMemoryToLanding();
+  maybePromptName();
   renderLandingStats();
+  maybeShowFourthPortal();
+  injectJournalButton();
+  injectAudioToggle();
+  startAmbient();
+
   showPage(landingPage);
 }
 
 function showNode(node) {
   const wasVisited = visitedNodes.has(node.id);
+  currentDepth     = nodeHistory.length + 1;
 
-  layerLabel.textContent = `[ layer ${node.layer} ]`;
+  recordDeepestLayer(node.layer);
 
-  // If this is a dead end being revisited, add a loop prefix
+  layerLabel.textContent = '[ layer ' + node.layer + ' ]';
+
   if (wasVisited || node.isDeadEnd) {
     nodeText.textContent = getLoopPrefix() + node.text;
+    soundDeadEnd();
   } else {
     nodeText.textContent = node.text;
   }
 
-  // Mark as visited
   visitedNodes.add(node.id);
-
   nodeChoices.innerHTML = '';
 
   node.choices.forEach(choice => {
     const btn = document.createElement('button');
     btn.textContent = choice.text;
-
     btn.addEventListener('click', async () => {
       setChoicesDisabled(true);
+      soundForEffect(choice.effect);
       await triggerEffect(choice.effect);
       await maybeShowNPC(node.layer);
       navigateTo(choice.next);
     });
-
     nodeChoices.appendChild(btn);
   });
 
@@ -121,66 +247,87 @@ function showNode(node) {
 
 function showEnding(node) {
   // NPC secret ending check
-  if (
-    node.id !== 98 &&
-    node.id !== 99 &&
-    getNPCState().count >= 1 &&
-    Math.random() < 0.45
-  ) {
-    const npcEndingNode = nodes.find(n => n.id === 98);
-    if (npcEndingNode) {
-      currentNodeId = 98;
-      _renderEnding(npcEndingNode);
-      return;
-    }
+  if (node.id !== 98 && node.id !== 99 && node.id !== 100 &&
+      getNPCState().count >= 1 && Math.random() < 0.45) {
+    const npcNode = nodes.find(n => n.id === 98);
+    if (npcNode) { currentNodeId = 98; _renderEnding(npcNode); return; }
   }
-
   _renderEnding(node);
 }
 
 function _renderEnding(node) {
+  const depth    = nodeHistory.length + 1;
+  const loopsHit = nodeHistory.filter(
+    id => nodes.find(n => n.id === id && n.isDeadEnd)
+  ).length;
+
+  const code = generateEndingCode(node.endingType, nodeHistory);
+
+  // Record
   recordEndingReached(node.endingType);
+  recordEndingFound(node.endingType);    // memory.js
+  if (node.endingType === 'konami') recordKonamiFound();
 
+  // Render text
   endingTextEl.textContent  = node.text;
-  endingTitleEl.textContent = node.title  || '';
+  endingTitleEl.textContent = node.title   || '';
   endingSubEl.textContent   = node.subtext || '';
-
-  // Show depth reached as flavour
-  const depth = nodeHistory.length + 1;
-  const loopsHit = [...nodeHistory]
-    .filter(id => nodes.find(n => n.id === id && n.isDeadEnd)).length;
 
   renderEndingStats(node.endingType);
 
-  // Append depth info to global stats
-  const isSecret = node.endingType === 'secret' || node.endingType === 'npcSecret';
+  // Ending code display
+  let codeEl = document.getElementById('ending-code');
+  if (!codeEl) {
+    codeEl = document.createElement('p');
+    codeEl.id = 'ending-code';
+    codeEl.style.cssText = [
+      'font-size: 0.75rem',
+      'color: #ff2244',
+      'letter-spacing: 0.25em',
+      'margin-top: 10px',
+      'font-family: Courier New, monospace'
+    ].join(';');
+    endingSubEl.after(codeEl);
+  }
+  codeEl.textContent = 'YOUR CODE: ' + code;
+
+  // Depth display
+  let depthEl = document.getElementById('ending-depth');
+  if (!depthEl) {
+    depthEl = document.createElement('p');
+    depthEl.id = 'ending-depth';
+    depthEl.style.cssText = [
+      'font-size: 0.6rem',
+      'color: #2a2a2a',
+      'letter-spacing: 0.12em',
+      'margin-top: 6px',
+      'font-family: Courier New, monospace'
+    ].join(';');
+    codeEl.after(depthEl);
+  }
+  depthEl.textContent = depth + ' steps deep' +
+    (loopsHit > 0 ? '  ·  ' + loopsHit + ' loop' + (loopsHit > 1 ? 's' : '') + ' hit' : '');
+
+  // Audio
+  const isSecret = node.endingType === 'secret' ||
+                   node.endingType === 'npcSecret' ||
+                   node.endingType === 'konami';
   if (isSecret) {
     globalStats.style.color    = '#00ff99';
     globalStats.style.fontSize = '0.9rem';
-    setTimeout(() => triggerEffect('colorShiftFast'), 300);
+    setTimeout(() => { triggerEffect('colorShiftFast'); soundSecretEnding(); }, 300);
   } else {
     globalStats.style.color    = '#444';
     globalStats.style.fontSize = '0.75rem';
+    setTimeout(soundEnding, 300);
   }
 
-  // Append descent stats
-  const depthNote = document.createElement('p');
-  depthNote.style.cssText = [
-    'font-size: 0.65rem',
-    'color: #2a2a2a',
-    'letter-spacing: 0.1em',
-    'margin-top: 8px'
-  ].join(';');
-  depthNote.textContent =
-    loopsHit > 0
-      ? `${depth} steps deep · ${loopsHit} loop${loopsHit > 1 ? 's' : ''} hit`
-      : `${depth} steps deep`;
-
-  // Only add once per ending display
-  const existingNote = endingPage.querySelector('.depth-note');
-  if (existingNote) existingNote.remove();
-  depthNote.classList.add('depth-note');
-  globalStats.after(depthNote);
+  // Store code + canvas for share
+  endingPage.dataset.code       = code;
+  endingPage.dataset.depth      = depth;
+  endingPage.dataset.loops      = loopsHit;
+  endingPage.dataset.endingType = node.endingType;
+  endingPage.dataset.endingTitle = node.title || '';
 
   showPage(endingPage);
 }
@@ -193,71 +340,140 @@ function _renderEnding(node) {
 function navigateTo(nodeId) {
   recordPath(nodeId);
 
-  // Rare sequence secret ending
   if (checkRareSequence()) {
-    const secretNode = nodes.find(n => n.id === 99);
-    if (secretNode) {
-      currentNodeId = 99;
-      showEnding(secretNode);
-      return;
-    }
+    const s = nodes.find(n => n.id === 99);
+    if (s) { currentNodeId = 99; showEnding(s); return; }
   }
 
   const node = nodes.find(n => n.id === nodeId);
-  if (!node) {
-    console.warn('Node not found:', nodeId);
-    return;
-  }
+  if (!node) { console.warn('Node not found:', nodeId); return; }
 
-  if (currentNodeId !== null) {
-    nodeHistory.push(currentNodeId);
-  }
-
+  if (currentNodeId !== null) nodeHistory.push(currentNodeId);
   currentNodeId = nodeId;
 
-  if (node.ending) {
-    showEnding(node);
-  } else {
-    showNode(node);
-  }
+  node.ending ? showEnding(node) : showNode(node);
 }
 
 function goBack() {
-  if (nodeHistory.length === 0) {
-    showLanding();
-    return;
-  }
-  const prevId = nodeHistory.pop();
+  if (nodeHistory.length === 0) { showLanding(); return; }
+  const prevId  = nodeHistory.pop();
   currentNodeId = prevId;
-  const node = nodes.find(n => n.id === prevId);
+  const node    = nodes.find(n => n.id === prevId);
   if (node) showNode(node);
 }
 
 
 /* ============================================
-   LANDING — portal buttons
+   FOURTH PORTAL — appears ~10% of visits
+   ============================================ */
+
+function maybeShowFourthPortal() {
+  const mem = getMemory();
+  // Show if: random 10% chance OR if never seen before after 3 visits
+  const shouldShow = Math.random() < 0.10 ||
+    (mem.visits >= 3 && !mem.fourthPortalSeen && Math.random() < 0.3);
+
+  if (!shouldShow) return;
+
+  recordFourthPortalSeen();
+
+  const choices = document.querySelector('#landing .choices');
+  if (!choices || document.getElementById('fourth-portal')) return;
+
+  const btn = document.createElement('button');
+  btn.id = 'fourth-portal';
+  btn.className = 'portal-btn fourth-portal';
+  btn.dataset.next   = '9';   // node 9 — "the dark spoke back"
+  btn.dataset.effect = 'screenInvert';
+
+  const icon  = document.createElement('span');
+  icon.className   = 'portal-icon';
+  icon.textContent = '🌀';
+
+  const label = document.createElement('span');
+  label.className   = 'portal-label';
+  label.textContent = '??? ??? ???';
+
+  btn.appendChild(icon);
+  btn.appendChild(label);
+  choices.appendChild(btn);
+
+  // Animate in with a flicker
+  btn.style.opacity = '0';
+  btn.style.transition = 'opacity 0.1s';
+  let flickers = 0;
+  const flicker = setInterval(() => {
+    btn.style.opacity = btn.style.opacity === '0' ? '1' : '0';
+    flickers++;
+    if (flickers > 6) {
+      clearInterval(flicker);
+      btn.style.opacity = '1';
+    }
+  }, 120);
+
+  btn.addEventListener('click', async () => {
+    currentPortal = 'fourth';
+    recordPortalPick('fourth');
+    document.querySelectorAll('#landing .choices button')
+      .forEach(b => b.disabled = true);
+    soundGlitch();
+    await triggerEffect('screenInvert');
+    document.querySelectorAll('#landing .choices button')
+      .forEach(b => b.disabled = false);
+    navigateTo(parseInt(btn.dataset.next, 10));
+  });
+}
+
+
+/* ============================================
+   LANDING PORTAL BUTTONS (original 3)
    ============================================ */
 
 const portalMap = { '1': 'red', '2': 'blue', '3': 'gap' };
 
-document.querySelectorAll('#landing .choices button').forEach(btn => {
+document.querySelectorAll('#landing .choices button:not(#fourth-portal)').forEach(btn => {
   btn.addEventListener('click', async () => {
-    const effect = btn.dataset.effect;
-    const nextId = parseInt(btn.dataset.next, 10);
-
     currentPortal = portalMap[btn.dataset.next] || 'red';
     recordPortalPick(currentPortal);
-
-    document.querySelectorAll('#landing .choices button')
-      .forEach(b => b.disabled = true);
-
-    await triggerEffect(effect);
-
-    document.querySelectorAll('#landing .choices button')
-      .forEach(b => b.disabled = false);
-
-    navigateTo(nextId);
+    document.querySelectorAll('#landing .choices button').forEach(b => b.disabled = true);
+    soundForEffect(btn.dataset.effect);
+    await triggerEffect(btn.dataset.effect);
+    document.querySelectorAll('#landing .choices button').forEach(b => b.disabled = false);
+    navigateTo(parseInt(btn.dataset.next, 10));
   });
+});
+
+
+/* ============================================
+   KONAMI CODE LISTENER
+   ↑ ↑ ↓ ↓ ← → ← → B A
+   ============================================ */
+
+const KONAMI = [
+  'ArrowUp','ArrowUp','ArrowDown','ArrowDown',
+  'ArrowLeft','ArrowRight','ArrowLeft','ArrowRight',
+  'b','a'
+];
+let konamiProgress = 0;
+
+document.addEventListener('keydown', e => {
+  if (e.key === KONAMI[konamiProgress]) {
+    konamiProgress++;
+    soundClick();
+    if (konamiProgress === KONAMI.length) {
+      konamiProgress = 0;
+      soundKonami();
+      setTimeout(() => {
+        const kNode = nodes.find(n => n.id === 100);
+        if (kNode) {
+          currentNodeId = 100;
+          _renderEnding(kNode);
+        }
+      }, 600);
+    }
+  } else {
+    konamiProgress = 0;
+  }
 });
 
 
@@ -270,70 +486,67 @@ restartBtn.addEventListener('click', showLanding);
 
 
 /* ============================================
-   SHARE
+   SHARE — result card + fallbacks
    ============================================ */
 
 shareBtn.addEventListener('click', handleShare);
 
 async function handleShare() {
-  const captureEl  = $('ending-capture');
-  const node       = nodes.find(n => n.id === currentNodeId);
-  const endingName = node?.title || 'THE RABBIT HOLE';
+  const code       = endingPage.dataset.code        || 'RH-????';
+  const depth      = parseInt(endingPage.dataset.depth)  || 0;
+  const loops      = parseInt(endingPage.dataset.loops)  || 0;
+  const eType      = endingPage.dataset.endingType  || '';
+  const eTitle     = endingPage.dataset.endingTitle || 'THE RABBIT HOLE';
 
-  if (typeof html2canvas !== 'undefined') {
-    try {
-      shareBtn.textContent = '📸 Capturing...';
-      shareBtn.disabled    = true;
+  shareBtn.textContent = '📸 Generating...';
+  shareBtn.disabled    = true;
 
-      const canvas = await html2canvas(captureEl, {
-        backgroundColor: '#000000',
-        scale: 2,
-        useCORS: true,
-        logging: false
+  try {
+    // Generate the styled result card
+    const canvas = await generateResultCard(eType, eTitle, code, depth, loops);
+
+    if (navigator.canShare) {
+      canvas.toBlob(async blob => {
+        const file = new File([blob], 'rabbit-hole.png', { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: 'Enter the Rabbit Hole',
+              text: `I reached "${eTitle}" — code: ${code} — ${depth} steps deep. Can you beat it? 🐇`
+            });
+            resetShareBtn();
+            return;
+          } catch { /* fall through to download */ }
+        }
+        triggerDownload(canvas, eTitle);
       });
-
-      if (navigator.canShare) {
-        canvas.toBlob(async blob => {
-          const file = new File([blob], 'rabbit-hole.png', { type: 'image/png' });
-          if (navigator.canShare({ files: [file] })) {
-            try {
-              await navigator.share({
-                files: [file],
-                title: 'Enter the Rabbit Hole',
-                text: `I reached: "${endingName}" after ${nodeHistory.length + 1} steps. Can you beat that? 🐇`
-              });
-              resetShareBtn();
-              return;
-            } catch { /* fall through */ }
-          }
-          triggerDownload(canvas, endingName);
-        });
-      } else {
-        triggerDownload(canvas, endingName);
-      }
-
-    } catch (err) {
-      console.error('Screenshot error:', err);
-      fallbackShare(endingName);
+    } else {
+      triggerDownload(canvas, eTitle);
     }
-  } else {
-    fallbackShare(endingName);
+  } catch (err) {
+    console.error('Card generation error:', err);
+    fallbackShare(eTitle, code, depth);
   }
 }
 
-function triggerDownload(canvas, endingName) {
-  const slug = endingName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+function triggerDownload(canvas, eTitle) {
+  const slug = eTitle.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
   const link = document.createElement('a');
-  link.download = `rabbit-hole-${slug}.png`;
+  link.download = 'rabbit-hole-' + slug + '.png';
   link.href     = canvas.toDataURL('image/png');
   link.click();
   shareBtn.textContent = '✓ Saved! Share it.';
   setTimeout(resetShareBtn, 2500);
 }
 
-function fallbackShare(endingName) {
-  const depth = nodeHistory.length + 1;
-  const text  = `I reached "${endingName}" after ${depth} steps in Enter the Rabbit Hole. Can you find all 14 endings? 🐇`;
+function fallbackShare(eTitle, code, depth) {
+  const text = [
+    'I reached "' + eTitle + '" in Enter the Rabbit Hole.',
+    'Code: ' + code + ' · ' + depth + ' steps deep.',
+    'Can you find all 16 endings? 🐇',
+    'kynaruniverse.github.io/enter-the-rabbit-hole'
+  ].join('\n');
   if (navigator.share) {
     navigator.share({ title: 'Enter the Rabbit Hole', text })
       .then(resetShareBtn)
@@ -370,13 +583,72 @@ function setChoicesDisabled(disabled) {
 
 
 /* ============================================
+   AMBIENT BACKGROUND — drifting ASCII chars
+   ============================================ */
+
+(function ambientBackground() {
+  const chars  = '░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀';
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = [
+    'position: fixed',
+    'inset: 0',
+    'pointer-events: none',
+    'z-index: 0',
+    'opacity: 0.025'
+  ].join(';');
+  document.body.insertBefore(canvas, document.body.firstChild);
+
+  const particles = [];
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for (let i = 0; i < 35; i++) {
+    particles.push({
+      x:     Math.random() * window.innerWidth,
+      y:     Math.random() * window.innerHeight,
+      speed: 0.15 + Math.random() * 0.4,
+      char:  chars[Math.floor(Math.random() * chars.length)],
+      size:  10 + Math.floor(Math.random() * 8),
+      timer: Math.floor(Math.random() * 120)
+    });
+  }
+
+  const ctx2 = canvas.getContext('2d');
+
+  function draw() {
+    ctx2.clearRect(0, 0, canvas.width, canvas.height);
+    ctx2.fillStyle = '#ffffff';
+    particles.forEach(p => {
+      p.y    += p.speed;
+      p.timer--;
+      if (p.timer <= 0) {
+        p.char  = chars[Math.floor(Math.random() * chars.length)];
+        p.timer = 60 + Math.floor(Math.random() * 180);
+      }
+      if (p.y > canvas.height + 20) {
+        p.y = -20;
+        p.x = Math.random() * canvas.width;
+      }
+      ctx2.font = p.size + 'px "Courier New"';
+      ctx2.fillText(p.char, p.x, p.y);
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+
+/* ============================================
    AMBIENT TITLE GLITCH
    ============================================ */
 
 (function ambientTitleGlitch() {
   const title = $('glitch-title');
   if (!title) return;
-
   function randomGlitch() {
     title.style.opacity = '0.7';
     setTimeout(() => title.style.opacity = '1', 80);
@@ -386,12 +658,143 @@ function setChoicesDisabled(disabled) {
     }, 150);
     setTimeout(randomGlitch, 3000 + Math.random() * 7000);
   }
-
   setTimeout(randomGlitch, 2000);
+})();
+
+
+/* ============================================
+   TIMED PRESSURE NODES
+   Certain nodes get a 15s countdown.
+   If timer expires, hole chooses for you.
+   ============================================ */
+
+const TIMED_NODE_IDS = new Set([7, 13, 22, 36, 42]);
+let activeTimer = null;
+
+function maybeStartTimer(node) {
+  clearActiveTimer();
+  if (!TIMED_NODE_IDS.has(node.id)) return;
+
+  const timerEl = document.getElementById('pressure-timer') || createTimerEl();
+  let remaining = 15;
+  timerEl.textContent = '[ ' + remaining + 's ]';
+  timerEl.style.color = '#444';
+  timerEl.style.display = 'block';
+
+  activeTimer = setInterval(() => {
+    remaining--;
+    timerEl.textContent = '[ ' + remaining + 's ]';
+
+    if (remaining <= 5) {
+      timerEl.style.color = '#ff2244';
+      soundGlitch();
+    }
+
+    if (remaining <= 0) {
+      clearActiveTimer();
+      // Hole chooses: pick a random choice
+      const btns = document.querySelectorAll('#node-choices button:not([disabled])');
+      if (btns.length > 0) {
+        const forced = btns[Math.floor(Math.random() * btns.length)];
+        timerEl.textContent = '[ THE HOLE CHOSE ]';
+        setTimeout(() => forced.click(), 600);
+      }
+    }
+  }, 1000);
+}
+
+function clearActiveTimer() {
+  if (activeTimer) { clearInterval(activeTimer); activeTimer = null; }
+  const timerEl = document.getElementById('pressure-timer');
+  if (timerEl) timerEl.style.display = 'none';
+}
+
+function createTimerEl() {
+  const el = document.createElement('p');
+  el.id = 'pressure-timer';
+  el.style.cssText = [
+    'font-size: 0.7rem',
+    'letter-spacing: 0.2em',
+    'margin-top: 16px',
+    'display: none',
+    'transition: color 0.3s',
+    'font-family: Courier New, monospace'
+  ].join(';');
+  const nodeInner = document.querySelector('.node-inner');
+  if (nodeInner) nodeInner.appendChild(el);
+  return el;
+}
+
+// Hook timer into showNode
+const _originalShowNode = showNode;
+// Override: start timer after node renders
+const showNodeWithTimer = function(node) {
+  _originalShowNode(node);
+  setTimeout(() => maybeStartTimer(node), 100);
+};
+
+// Patch: replace showNode calls inside navigateTo
+// We do this by wrapping navigateTo
+const _origNavigateTo = navigateTo;
+
+
+/* ============================================
+   DAILY SEED SYSTEM
+   Changes which effects fire and NPC chances
+   based on today's date
+   ============================================ */
+
+(function applySeed() {
+  const now  = new Date();
+  const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+
+  // Seed the ambient background particle count/speed
+  const seedRng = (n) => ((seed * 9301 + n * 49297) % 233280) / 233280;
+
+  // Modify NPC chances slightly per day (±0.05)
+  if (typeof NPC_ROSTER !== 'undefined') {
+    NPC_ROSTER.forEach((npc, i) => {
+      const delta = (seedRng(i) - 0.5) * 0.1;
+      npc.chance = Math.min(0.45, Math.max(0.05, npc.chance + delta));
+    });
+  }
+
+  // Daily landing flavour text
+  const dailyMessages = [
+    '[ new paths available today ]',
+    '[ the hole is different today ]',
+    '[ something shifted overnight ]',
+    '[ today\'s seed: ' + seed + ' ]',
+    '[ come back tomorrow ]',
+    '[ patterns change with the date ]',
+    '[ the hole remembers yesterday ]'
+  ];
+  const dailyMsg = dailyMessages[seed % dailyMessages.length];
+
+  // Inject below warning text
+  window.addEventListener('DOMContentLoaded', () => {
+    const warn = document.querySelector('#landing .warning-text');
+    if (!warn) return;
+    const el = document.createElement('p');
+    el.style.cssText = [
+      'font-size: 0.6rem',
+      'color: #1a1a1a',
+      'letter-spacing: 0.15em',
+      'margin-top: 6px',
+      'font-family: Courier New, monospace'
+    ].join(';');
+    el.textContent = dailyMsg;
+    warn.after(el);
+  });
 })();
 
 
 /* ============================================
    INIT
    ============================================ */
+
+// Wire timer into node display
+nodePage.addEventListener('click', () => {}, { passive: true });
+
+// Start
 showLanding();
