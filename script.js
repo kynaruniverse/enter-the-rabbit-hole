@@ -101,6 +101,29 @@ const FLAVOUR = {
   konami:    'Some doors are not in the walls. They are in the fingers.'
 };
 
+/* ============================================
+   ENDING RARITY SYSTEM
+   Displays how rare each ending is
+   ============================================ */
+const ENDING_RARITY = {
+  survived:  { rarity: 'COMMON', percent: 18, color: '#2a2a2a' },
+  consumed:  { rarity: 'COMMON', percent: 16, color: '#2a2a2a' },
+  supposed:  { rarity: 'UNCOMMON', percent: 12, color: '#aaaaff' },
+  alone:     { rarity: 'UNCOMMON', percent: 11, color: '#aaaaff' },
+  waited:    { rarity: 'RARE', percent: 8, color: '#ffff44' },
+  floor:     { rarity: 'RARE', percent: 7, color: '#ffff44' },
+  looping:   { rarity: 'RARE', percent: 6, color: '#ffff44' },
+  quiet:     { rarity: 'RARE', percent: 5, color: '#ffff44' },
+  leaving:   { rarity: 'EPIC', percent: 4, color: '#ff9944' },
+  observer:  { rarity: 'EPIC', percent: 3, color: '#ff9944' },
+  hollow:    { rarity: 'EPIC', percent: 2, color: '#ff9944' },
+  named:     { rarity: 'LEGENDARY', percent: 2, color: '#ffff00' },
+  free:      { rarity: 'LEGENDARY', percent: 1, color: '#ffff00' },
+  npcSecret: { rarity: 'MYTHIC', percent: 0.5, color: '#ff2244' },
+  secret:    { rarity: 'MYTHIC', percent: 0.3, color: '#ff2244' },
+  konami:    { rarity: 'MYTHIC', percent: 0.2, color: '#ff2244' }
+};
+
 async function generateResultCard(endingType, endingTitle, code, depth, loopsHit) {
   const W = 960, H = 504;
   const canvas = document.createElement('canvas');
@@ -398,6 +421,61 @@ function _renderEnding(node) {
   }
   depthEl.textContent = depth + ' steps deep' +
     (loopsHit > 0 ? '  ·  ' + loopsHit + ' loop' + (loopsHit > 1 ? 's' : '') + ' hit' : '');
+    
+    // Endings Found Counter
+const memory = (() => {
+  try {
+    return JSON.parse(localStorage.getItem('rh_memory')) || {};
+  } catch {
+    return {};
+  }
+})();
+const endingsFound = (memory.endingsFound || []).length;
+const totalEndings = 16;
+const percentage = Math.round((endingsFound / totalEndings) * 100);
+
+let progressEl = $('ending-progress');
+if (!progressEl) {
+  progressEl = document.createElement('p');
+  progressEl.id = 'ending-progress';
+  progressEl.style.cssText = [
+    'font-size: 0.65rem',
+    'color: #00ff99',
+    'letter-spacing: 0.15em',
+    'margin-top: 12px',
+    'font-family: Courier New, monospace',
+    'opacity: 0.8'
+  ].join(';');
+  depthEl.after(progressEl);
+}
+progressEl.textContent = '[ PROGRESS: ' + endingsFound + '/' + totalEndings + ' ENDINGS — ' + percentage + '% ]';
+
+// Rarity display
+const rarityData = ENDING_RARITY[node.endingType] || { rarity: 'UNKNOWN', percent: 0, color: '#666' };
+let rarityEl = $('ending-rarity');
+if (!rarityEl) {
+  rarityEl = document.createElement('p');
+  rarityEl.id = 'ending-rarity';
+  rarityEl.style.cssText = [
+    'font-size: 0.65rem',
+    'letter-spacing: 0.2em',
+    'margin-top: 8px',
+    'text-transform: uppercase',
+    'font-family: Courier New, monospace',
+    'opacity: 0.9'
+  ].join(';');
+  progressEl.after(rarityEl);
+}
+
+const raritySymbol = rarityData.rarity === 'MYTHIC' ? '★★★' : 
+                     rarityData.rarity === 'LEGENDARY' ? '★★' :
+                     rarityData.rarity === 'EPIC' ? '★' : '';
+
+rarityEl.style.color = rarityData.color;
+rarityEl.textContent = raritySymbol + (raritySymbol ? ' ' : '') + 
+                       rarityData.rarity + ' (' + rarityData.percent + '% of players)';
+    
+    
 
   // In-page card preview
   renderCardPreview(node.endingType, node.title || '', code, depth, loopsHit);
@@ -433,8 +511,10 @@ function _renderEnding(node) {
   endingPage.dataset.loops       = loopsHit;
   endingPage.dataset.endingType  = node.endingType;
   endingPage.dataset.endingTitle = node.title || '';
+  
 
   showPage(endingPage);
+  setTimeout(() => injectChallengeCode(), 100);
 }
 
 /* ============================================
@@ -625,6 +705,80 @@ async function handleShare() {
   }
 }
 
+/* ============================================
+   CHALLENGE CODE SYSTEM
+   Displays challenge code for social sharing
+   ============================================ */
+function injectChallengeCode() {
+  const code = endingPage.dataset.code || 'RH-????';
+  const eType = endingPage.dataset.endingType || '';
+  const rarityData = ENDING_RARITY[eType] || { rarity: 'UNKNOWN' };
+  
+  // Check if already exists
+  if ($('challenge-code-box')) return;
+  
+  const box = document.createElement('div');
+  box.id = 'challenge-code-box';
+  box.style.cssText = [
+    'border: 1px solid #00ff99',
+    'padding: 16px',
+    'margin: 20px 0',
+    'text-align: center',
+    'background: rgba(0,255,153,0.02)',
+    'border-radius: 2px'
+  ].join(';');
+  
+  const label = document.createElement('p');
+  label.style.cssText = [
+    'font-size: 0.6rem',
+    'color: #00ff99',
+    'letter-spacing: 0.25em',
+    'margin-bottom: 8px',
+    'opacity: 0.6'
+  ].join(';');
+  label.textContent = '[ CHALLENGE CODE ]';
+  
+  const codeDisplay = document.createElement('p');
+  codeDisplay.style.cssText = [
+    'font-size: 1rem',
+    'color: #00ff99',
+    'letter-spacing: 0.3em',
+    'font-weight: bold',
+    'margin: 8px 0',
+    'cursor: pointer',
+    'padding: 8px',
+    'transition: all 0.3s',
+    'font-family: Courier New, monospace'
+  ].join(';');
+  codeDisplay.textContent = code;
+  codeDisplay.addEventListener('click', () => {
+    navigator.clipboard.writeText(code);
+    codeDisplay.textContent = '✓ COPIED';
+    setTimeout(() => { codeDisplay.textContent = code; }, 1500);
+  });
+  
+  const desc = document.createElement('p');
+  desc.style.cssText = [
+    'font-size: 0.55rem',
+    'color: #1a1a1a',
+    'letter-spacing: 0.1em',
+    'margin-top: 8px'
+  ].join(';');
+  desc.innerHTML = 'Share this code. Others will see your ' + rarityData.rarity.toLowerCase() + ' ending.<br>Can they reach it?';
+  
+  box.appendChild(label);
+  box.appendChild(codeDisplay);
+  box.appendChild(desc);
+  
+  // Insert after rarity display
+  const rarityEl = $('ending-rarity');
+  if (rarityEl) {
+    rarityEl.after(box);
+  } else {
+    const progressEl = $('ending-progress');
+    if (progressEl) progressEl.after(box);
+  }
+}
 function triggerDownload(canvas, eTitle) {
   const slug = eTitle.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
   const link = document.createElement('a');
@@ -636,12 +790,30 @@ function triggerDownload(canvas, eTitle) {
 }
 
 function fallbackShare(eTitle, code, depth) {
+  const eType = endingPage.dataset.endingType || '';
+  const rarityData = ENDING_RARITY[eType] || { rarity: 'UNKNOWN', percent: 0 };
+  
+  let shareText = '';
+  if (rarityData.rarity === 'MYTHIC') {
+    shareText = '🔴 I FOUND A MYTHIC ENDING: "' + eTitle + '"';
+  } else if (rarityData.rarity === 'LEGENDARY') {
+    shareText = '⭐ I found a LEGENDARY ending: "' + eTitle + '"';
+  } else if (rarityData.rarity === 'EPIC') {
+    shareText = '★ I reached the EPIC ending: "' + eTitle + '"';
+  } else if (rarityData.rarity === 'RARE') {
+    shareText = '💛 Found a RARE ending: "' + eTitle + '"';
+  } else {
+    shareText = 'I reached "' + eTitle + '" in Enter the Rabbit Hole.';
+  }
+  
   const text = [
-    'I reached "' + eTitle + '" in Enter the Rabbit Hole.',
-    'Code: ' + code + '  ·  ' + depth + ' steps deep.',
+    shareText,
+    'Code: ' + code + '  ·  ' + depth + ' steps deep',
+    'Rarity: ' + rarityData.rarity + ' (' + rarityData.percent + '% of players)',
     'Can you find all 16 endings? 🐇',
-    'kynaruniverse.github.io/enter-the-rabbit-hole/about.html'
+    'kynaruniverse.github.io/enter-the-rabbit-hole'
   ].join('\n');
+  
   if (navigator.share) {
     navigator.share({ title: 'Enter the Rabbit Hole', text })
       .then(resetShareBtn)
@@ -825,6 +997,52 @@ function createTimerEl() {
     ].join(';');
     el.textContent = msgs[seed % msgs.length];
     warn.after(el);
+  });
+})();
+
+/* ============================================
+   DAILY MYSTERY TEASER
+   Rotates hints based on the day
+   ============================================ */
+(function injectDailyMystery() {
+  const MYSTERY_HINTS = [
+    '[ a fourth portal appears to some. return 3+ times. ]',
+    '[ ↑↑↓↓←→←→ba is not random. try it. ]',
+    '[ certain npcs only appear on certain days. ]',
+    '[ the deepest paths hide secrets. dig. ]',
+    '[ 16 endings exist. most never find them all. ]',
+    '[ some endings loop. some loop forever. ]',
+    '[ the secret ending has a secret. ]',
+    '[ come back tomorrow. something changes. ]',
+    '[ one path circles back to the start. ]',
+    '[ every version of you stopped somewhere. except one. ]',
+    '[ the rabbit remembers your choices. ]',
+    '[ layer 7 is not the end. ]'
+  ];
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const now = new Date();
+    const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+    const hintIndex = seed % MYSTERY_HINTS.length;
+    const hint = MYSTERY_HINTS[hintIndex];
+
+    const warningText = document.querySelector('#landing .warning-text');
+    if (!warningText) return;
+
+    const hintEl = document.createElement('p');
+    hintEl.style.cssText = [
+      'font-size: 0.6rem',
+      'color: #1a1a1a',
+      'letter-spacing: 0.15em',
+      'margin-top: 12px',
+      'font-family: Courier New, monospace',
+      'opacity: 0.7',
+      'animation: fadeIn 0.8s ease'
+    ].join(';');
+    hintEl.textContent = hint;
+
+    // Insert after warning text
+    warningText.parentElement.insertBefore(hintEl, warningText.nextSibling);
   });
 })();
 
