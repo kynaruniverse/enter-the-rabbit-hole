@@ -3,7 +3,7 @@
    Cache: v6 (Direction 2+3 update)
    ============================================ */
 
-const CACHE_NAME = 'rabbit-hole-v6';
+const CACHE_NAME = 'rabbit-hole-v7';
 
 const CORE_FILES = [
   '/enter-the-rabbit-hole/',

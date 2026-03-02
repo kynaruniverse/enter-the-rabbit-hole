@@ -15,7 +15,7 @@ const defaultStats = {
   portals: { red: 0, blue: 0, gap: 0, fourth: 0 },
   endings: {
     survived: 0, consumed: 0, looping: 0, observer: 0,
-    mirror: 0, free: 0, secret: 0, supposed: 0, alone: 0,
+    free: 0, secret: 0, supposed: 0, alone: 0,
     waited: 0, floor: 0, quiet: 0, leaving: 0, hollow: 0,
     named: 0, npcSecret: 0, konami: 0
   }
@@ -109,7 +109,7 @@ function renderLandingStats() {
 const ENDING_LABELS = {
   survived:  'Survived',    consumed:  'Consumed',
   looping:   'The Loop',    observer:  'Observer',
-  mirror:    'Mirror',      free:      'Escape',
+  free:      'Escape',
   secret:    '★ Secret',    supposed:  'Supposed',
   alone:     'Only One',    waited:    'Waited',
   floor:     'The Floor',   quiet:     'Quiet',

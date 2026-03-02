@@ -27,8 +27,10 @@ let _sessionId   = null;
    ============================================ */
 (function _init() {
   if (
-    SUPABASE_URL === 'https://yojnzlojtomgizdyqwus.supabase.co' ||
-    SUPABASE_KEY === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlvam56bG9qdG9tZ2l6ZHlxd3VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0MDQ4MjUsImV4cCI6MjA4Nzk4MDgyNX0.1zAT2caUCsKauE0ENGlFIUZ_Zhv2d_VvOrOc8MD7UbM'
+    !SUPABASE_URL ||
+    !SUPABASE_KEY ||
+    SUPABASE_URL.startsWith('YOUR_') ||
+    SUPABASE_KEY.startsWith('YOUR_')
   ) {
     console.info(
       '[RH:Supabase] Not configured. ' +
@@ -67,6 +69,7 @@ async function _insert(table, data) {
       body:    JSON.stringify(data)
     });
     if (!res.ok) console.warn('[RH:Supabase] insert error', await res.text());
+    if (res.ok) console.log('[RH:Supabase] ✓ inserted into', table);
     return res.ok;
   } catch (e) {
     console.warn('[RH:Supabase] network error', e.message);

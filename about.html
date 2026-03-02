@@ -581,7 +581,7 @@
 /* ---- Config (same as supabase.js) ---- */
 const SB_URL = 'https://yojnzlojtomgizdyqwus.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlvam56bG9qdG9tZ2l6ZHlxd3VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0MDQ4MjUsImV4cCI6MjA4Nzk4MDgyNX0.1zAT2caUCsKauE0ENGlFIUZ_Zhv2d_VvOrOc8MD7UbM';
-const SB_READY = SB_URL !== 'https://yojnzlojtomgizdyqwus.supabase.co';
+const SB_READY = SB_URL && !SB_URL.startsWith('YOUR_');
 
 const ENDING_NAMES = {
   survived:  'YOU SURVIVED',
@@ -597,7 +597,7 @@ const ENDING_NAMES = {
   hollow:    'THE HOLLOW',
   named:     'ON THE LIST',
   free:      'ESCAPE',
-  npcSecret: '[ NPC SECRET ]',
+  npcSecret: '[ CLASSIFIED ]',
   secret:    '< CLASSIFIED >',
   konami:    'THE BACK DOOR'
 };

@@ -3,7 +3,7 @@
   "short_name": "Rabbit Hole",
   "description": "A surreal interactive experience. Choose your portal. There is no going back.",
   "start_url": "/enter-the-rabbit-hole/",
-  "display": "fullscreen",
+  "display": "standalone",
   "orientation": "portrait",
   "background_color": "#000000",
   "theme_color": "#000000",
