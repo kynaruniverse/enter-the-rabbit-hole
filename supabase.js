@@ -13,8 +13,8 @@
 /* ============================================
    ⚙️  CONFIG — fill these in after Supabase setup
    ============================================ */
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://yojnzlojtomgizdyqwus.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlvam56bG9qdG9tZ2l6ZHlxd3VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0MDQ4MjUsImV4cCI6MjA4Nzk4MDgyNX0.1zAT2caUCsKauE0ENGlFIUZ_Zhv2d_VvOrOc8MD7UbM';
 
 /* ============================================
    STATE
@@ -27,8 +27,8 @@ let _sessionId   = null;
    ============================================ */
 (function _init() {
   if (
-    SUPABASE_URL === 'YOUR_SUPABASE_URL' ||
-    SUPABASE_KEY === 'YOUR_SUPABASE_ANON_KEY'
+    SUPABASE_URL === 'https://yojnzlojtomgizdyqwus.supabase.co' ||
+    SUPABASE_KEY === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlvam56bG9qdG9tZ2l6ZHlxd3VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0MDQ4MjUsImV4cCI6MjA4Nzk4MDgyNX0.1zAT2caUCsKauE0ENGlFIUZ_Zhv2d_VvOrOc8MD7UbM'
   ) {
     console.info(
       '[RH:Supabase] Not configured. ' +
