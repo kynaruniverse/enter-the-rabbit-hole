@@ -44,6 +44,7 @@ let currentNodeId = null;
 let currentPortal = null;
 let visitedNodes  = new Set();
 let currentDepth  = 0;
+let runStartTime  = null;
 
 /* ============================================
    LOOP DETECTION
@@ -124,7 +125,8 @@ const ENDING_RARITY = {
   konami:    { rarity: 'MYTHIC', percent: 0.2, color: '#ff2244' }
 };
 
-async function generateResultCard(endingType, endingTitle, code, depth, loopsHit) {
+async function generateResultCard(endingType, endingTitle, code, depth, loopsHit, elapsed) {
+  elapsed = elapsed || '?s';
   const W = 960, H = 504;
   const canvas = document.createElement('canvas');
   canvas.width  = W;
@@ -192,9 +194,10 @@ async function generateResultCard(endingType, endingTitle, code, depth, loopsHit
   // ---- Stats row ----
   ctx.font      = '11px "Courier New"';
   ctx.fillStyle = '#333';
-  ctx.fillText(depth    + ' STEPS DEEP',                44,  196);
-  ctx.fillText(loopsHit + ' LOOP' + (loopsHit !== 1 ? 'S' : '') + ' HIT', 230, 196);
-  ctx.fillText('LAYER 7 REACHED',                       420, 196);
+  ctx.fillText(depth    + ' STEPS DEEP',                          44,  196);
+  ctx.fillText(loopsHit + ' LOOP' + (loopsHit !== 1 ? 'S' : '') + ' HIT', 220, 196);
+  ctx.fillText('LAYER 7',                                         390, 196);
+  ctx.fillText(elapsed + ' IN THE HOLE',                          490, 196);
 
   // ---- Second divider ----
   ctx.fillStyle = '#0d0d0d';
@@ -250,7 +253,8 @@ async function generateResultCard(endingType, endingTitle, code, depth, loopsHit
    so the user sees something beautiful
    before downloading/sharing
    ============================================ */
-function renderCardPreview(endingType, endingTitle, code, depth, loopsHit) {
+function renderCardPreview(endingType, endingTitle, code, depth, loopsHit, elapsed) {
+  elapsed = elapsed || '?s';
   const existing = document.getElementById('result-card-preview');
   if (existing) existing.remove();
 
@@ -277,6 +281,7 @@ function renderCardPreview(endingType, endingTitle, code, depth, loopsHit) {
       '<span>' + depth + ' STEPS DEEP</span>' +
       '<span>' + loopsHit + ' LOOP' + (loopsHit !== 1 ? 'S' : '') + '</span>' +
       '<span>LAYER 7</span>' +
+      '<span>' + elapsed + ' IN THE HOLE</span>' +
     '</div>' +
     '<div class="rcp-divider"></div>' +
     '<p class="rcp-flavour">' + flavour + '</p>' +
@@ -300,12 +305,27 @@ function showPage(pageEl) {
 function showLanding() {
   resetPath();
   resetNPCState();
-  nodeHistory   = [];
+  nodeHistory = [];
   currentNodeId = null;
   currentPortal = null;
-  visitedNodes  = new Set();
-  currentDepth  = 0;
+  visitedNodes = new Set();
+  currentDepth = 0;
+  
+  // Loop ending warp — title glitches on return
+  const loopWarp = sessionStorage.getItem('rh_loop_warp');
+  if (loopWarp) {
+    sessionStorage.removeItem('rh_loop_warp');
+    const titleEl = document.getElementById('glitch-title');
+    if (titleEl) {
+      titleEl.dataset.text = 'ENTER THE RABBIT HOLE';
+      titleEl.textContent = 'E̷N̸T̶E̸R̷ ̵T̴H̷E̸ ̶R̷A̸B̶B̴I̵T̶ ̷H̸O̴L̷E̵';
+      setTimeout(() => {
+        titleEl.textContent = 'ENTER THE RABBIT HOLE';
+      }, 2200);
+    }
+  }
 
+  runStartTime = null;
   applyMemoryToLanding();
   maybePromptName();
   renderLandingStats();
@@ -320,7 +340,8 @@ function showNode(node) {
   const wasVisited = visitedNodes.has(node.id);
   currentDepth     = nodeHistory.length + 1;
   recordDeepestLayer(node.layer);
-
+  if (!runStartTime) runStartTime = Date.now();
+  
   layerLabel.textContent = '[ layer ' + node.layer + ' ]';
 
   if (wasVisited || node.isDeadEnd) {
@@ -419,8 +440,16 @@ function _renderEnding(node) {
     ].join(';');
     codeEl.after(depthEl);
   }
+  const elapsedMs  = runStartTime ? Date.now() - runStartTime : 0;
+  const elapsedMin = Math.floor(elapsedMs / 60000);
+  const elapsedSec = Math.floor((elapsedMs % 60000) / 1000);
+  const elapsedStr = elapsedMin > 0
+    ? elapsedMin + 'm ' + elapsedSec + 's'
+    : elapsedSec + 's';
+
   depthEl.textContent = depth + ' steps deep' +
-    (loopsHit > 0 ? '  ·  ' + loopsHit + ' loop' + (loopsHit > 1 ? 's' : '') + ' hit' : '');
+    (loopsHit > 0 ? '  ·  ' + loopsHit + ' loop' + (loopsHit > 1 ? 's' : '') + ' hit' : '') +
+    '  ·  ' + elapsedStr + ' in the hole';
     
     // Endings Found Counter
 const memory = (() => {
@@ -478,7 +507,7 @@ rarityEl.textContent = raritySymbol + (raritySymbol ? ' ' : '') +
     
 
   // In-page card preview
-  renderCardPreview(node.endingType, node.title || '', code, depth, loopsHit);
+  renderCardPreview(node.endingType, node.title || '', code, depth, loopsHit, _elapsedStr);
 
   // Local stats bar
   renderEndingStats(node.endingType);
@@ -506,9 +535,17 @@ rarityEl.textContent = raritySymbol + (raritySymbol ? ' ' : '') +
   }
 
   // Store metadata for share
+  const _elapsedMs  = runStartTime ? Date.now() - runStartTime : 0;
+  const _elapsedMin = Math.floor(_elapsedMs / 60000);
+  const _elapsedSec = Math.floor((_elapsedMs % 60000) / 1000);
+  const _elapsedStr = _elapsedMin > 0
+    ? _elapsedMin + 'm ' + _elapsedSec + 's'
+    : _elapsedSec + 's';
+
   endingPage.dataset.code        = code;
   endingPage.dataset.depth       = depth;
   endingPage.dataset.loops       = loopsHit;
+  endingPage.dataset.elapsed     = _elapsedStr;
   endingPage.dataset.endingType  = node.endingType;
   endingPage.dataset.endingTitle = node.title || '';
   
@@ -663,22 +700,35 @@ backBtn.addEventListener('click', goBack);
 restartBtn.addEventListener('click', showLanding);
 
 /* ============================================
+   LOOP ENDING — node 56 warps landing on restart
+   ============================================ */
+function maybeApplyLoopState() {
+  const eType = endingPage.dataset.endingType || '';
+  if (eType !== 'looping') return;
+  // Flag for showLanding to detect
+  sessionStorage.setItem('rh_loop_warp', '1');
+}
+
+restartBtn.addEventListener('click', maybeApplyLoopState, { capture: true });
+
+/* ============================================
    SHARE — polished result card
    ============================================ */
 shareBtn.addEventListener('click', handleShare);
 
 async function handleShare() {
-  const code   = endingPage.dataset.code        || 'RH-????';
-  const depth  = parseInt(endingPage.dataset.depth)  || 0;
-  const loops  = parseInt(endingPage.dataset.loops)  || 0;
-  const eType  = endingPage.dataset.endingType  || '';
-  const eTitle = endingPage.dataset.endingTitle || 'THE RABBIT HOLE';
+  const code    = endingPage.dataset.code        || 'RH-????';
+  const depth   = parseInt(endingPage.dataset.depth)  || 0;
+  const loops   = parseInt(endingPage.dataset.loops)  || 0;
+  const elapsed = endingPage.dataset.elapsed     || '?s';
+  const eType   = endingPage.dataset.endingType  || '';
+  const eTitle  = endingPage.dataset.endingTitle || 'THE RABBIT HOLE';
 
   shareBtn.textContent = '📸 Generating...';
   shareBtn.disabled    = true;
 
   try {
-    const canvas = await generateResultCard(eType, eTitle, code, depth, loops);
+    const canvas = await generateResultCard(eType, eTitle, code, depth, loops, elapsed);
 
     if (navigator.canShare) {
       canvas.toBlob(async blob => {
@@ -689,7 +739,7 @@ async function handleShare() {
               files: [file],
               title: 'Enter the Rabbit Hole',
               text:  'I reached "' + eTitle + '" — code: ' + code +
-                     ' — ' + depth + ' steps deep. Can you beat it? 🐇'
+                     ' — ' + depth + ' steps deep in ' + elapsed + '. Can you beat it? 🐇'
             });
             resetShareBtn(); return;
           } catch { /* fall through */ }
@@ -701,7 +751,7 @@ async function handleShare() {
     }
   } catch (err) {
     console.error('Card error:', err);
-    fallbackShare(eTitle, code, depth);
+    fallbackShare(eTitle, code, depth, elapsed);
   }
 }
 
@@ -789,7 +839,8 @@ function triggerDownload(canvas, eTitle) {
   setTimeout(resetShareBtn, 2500);
 }
 
-function fallbackShare(eTitle, code, depth) {
+function fallbackShare(eTitle, code, depth, elapsed) {
+  elapsed = elapsed || '?s';
   const eType = endingPage.dataset.endingType || '';
   const rarityData = ENDING_RARITY[eType] || { rarity: 'UNKNOWN', percent: 0 };
   
@@ -807,11 +858,10 @@ function fallbackShare(eTitle, code, depth) {
   }
   
   const text = [
-    shareText,
-    'Code: ' + code + '  ·  ' + depth + ' steps deep',
-    'Rarity: ' + rarityData.rarity + ' (' + rarityData.percent + '% of players)',
+    'I reached "' + eTitle + '" in Enter the Rabbit Hole.',
+    'Code: ' + code + '  ·  ' + depth + ' steps deep  ·  ' + elapsed + ' in the hole.',
     'Can you find all 16 endings? 🐇',
-    'kynaruniverse.github.io/enter-the-rabbit-hole'
+    'kynaruniverse.github.io/enter-the-rabbit-hole/about.html'
   ].join('\n');
   
   if (navigator.share) {

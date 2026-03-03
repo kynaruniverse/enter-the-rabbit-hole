@@ -1682,7 +1682,13 @@ The hole knows.`,
    PATH TRACKER
    ============================================ */
 
-const RARE_SEQUENCE = [1, 5, 10];
+// Secret path: Red Portal → "Wait and watch it" (node 6) →
+// "Close both eyes" (leads back to 10) → "Follow the air" (node 20) →
+// "Press the third spot" (node 30) → "Take the marked branch" (node 38)
+// That path visits nodes in sequence: 1 → 6 → 10 → 20 → 30 → 38
+// RARE_SEQUENCE checks the last 4 recorded IDs: [20, 30, 38, <ending node>]
+// We trigger it when reaching node 38 specifically after 20 and 30
+const RARE_SEQUENCE = [20, 30, 38];
 let pathHistory = [];
 
 function recordPath(nodeId) {

@@ -42,6 +42,8 @@ const NPC_ROSTER = [
       "I'm not a symbol. I'm a warning.",
       "You chose this before you clicked anything.",
       "The others turned back. You didn't. Interesting.",
+      "The first one who entered never came back. Not because they couldn't. Because they didn't want to.",
+      "GL1TCH is wrong about me. I don't lead people here. I just watch them choose to come.",
     ]
   },
 
@@ -63,6 +65,8 @@ const NPC_ROSTER = [
       "I've been here since before the first portal.",
       "D0 N0T TR U S T  T H E  R A B B I T.",
       "You are not the first. You will not be the last. But you might be the only.",
+      "The Cartographer mapped me once. Said I was in a room between rooms. Burned that page specifically.",
+      "The first explorer left something behind. A half-finished thought. I am what grew from it.",
     ]
   },
 
@@ -85,6 +89,8 @@ const NPC_ROSTER = [
       "The gap between the walls is not empty. I drew what's inside once. I burned the map.",
       "Every explorer who reached the bottom came back... different.",
       "You're on path 7 of 7. The others are watching.",
+      "The first explorer left a half-thought in Layer 3. It's still there. I mapped around it. I don't go near it.",
+      "GL1TCH is what the hole made from the unfinished things people left behind. Don't tell it I said that.",
     ]
   },
 
@@ -106,6 +112,8 @@ const NPC_ROSTER = [
       "Don't look for meaning in the hole. The hole is the meaning.",
       "You feel like you're reading this. You're not. You're remembering it.",
       "I tried to warn you at the start. You clicked too fast.",
+      "In my version, the rabbit warned me before I reached Layer 4. I didn't listen either.",
+      "There's a version of you that found the secret ending on the first try. I've met them. They're quieter than you.",
     ]
   },
 
@@ -127,6 +135,8 @@ const NPC_ROSTER = [
       "there is something past the last ending",
       "████████████",
       "you weren't supposed to find this one",
+      "the first one is still here",
+      "████ left something in layer 3. don't touch it.",
     ]
   }
 

@@ -11,7 +11,7 @@
   <meta property="og:description"  content="A surreal interactive experience. 16 endings. One secret. Most never find the bottom." />
   <meta property="og:type"         content="website" />
   <meta property="og:image"        content="https://kynaruniverse.github.io/enter-the-rabbit-hole/preview.png" />
-  <<meta property="og:url"          content="https://kynaruniverse.github.io/enter-the-rabbit-hole/" />
+  <meta property="og:url"          content="https://kynaruniverse.github.io/enter-the-rabbit-hole/" />
   <meta property="og:image:width"  content="1200" />
   <meta property="og:image:height" content="630" />
 
@@ -43,6 +43,7 @@
           ENTER THE RABBIT HOLE
         </h1>
         <p class="subtitle">Choose a portal to begin...</p>
+          <p class="experience-hint">A branching experience. Every choice is real.</p>        
         <div class="choices">
           <button class="portal-btn red-portal"  data-next="1" data-effect="glitchShake">
             <span class="portal-icon">🔴</span>
@@ -68,7 +69,7 @@
         <p class="layer-label" id="layer-label">[ layer 1 ]</p>
         <p class="node-text"   id="node-text"></p>
         <div class="choices"   id="node-choices"></div>
-        <button class="back-btn" id="back-btn">↩ Retreat</button>
+        <button class="back-btn" id="back-btn">↩ Retreat (the hole may not remember this)</button>
       </div>
     </div>
 
@@ -88,6 +89,8 @@
         <div class="stat-item"    id="stat-item-2"></div>
         <div class="stat-divider">|</div>
         <div class="stat-item"    id="stat-item-3"></div>
+        <div class="stat-divider">|</div>
+        <div class="stat-item"    id="stat-item-time"></div>
       </div>
       <div class="ending-actions">
         <button class="action-btn"           id="share-btn">📸 Share Card</button>
