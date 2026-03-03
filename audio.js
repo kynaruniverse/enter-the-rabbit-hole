@@ -14,6 +14,7 @@ let ambientNode = null;
 let ambientGain = null;
 let audioEnabled = false;
 let audioUnlocked = false;
+let ambientSuppressed = false;
 
 /* ============================================
    INIT — called on first user interaction
@@ -42,7 +43,7 @@ function unlockAudio() {
 ['click', 'touchstart', 'keydown'].forEach(evt => {
   document.addEventListener(evt, () => {
     unlockAudio();
-    if (!ambientNode && audioEnabled) {
+    if (!ambientNode && audioEnabled && !ambientSuppressed) {
       setTimeout(startAmbient, 800);
     }
   }, { once: false, passive: true });
@@ -118,8 +119,9 @@ function startAmbient() {
   ambientNode = { osc1, osc2, osc3, lfo, noise };
 }
 
-function stopAmbient() {
+function stopAmbient(suppress) {
   if (!ambientNode || !ambientGain) return;
+  if (suppress) ambientSuppressed = true;
   ambientGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5);
   setTimeout(() => {
     try {
@@ -143,8 +145,12 @@ function fadeAmbientTo(volume, duration) {
    ============================================ */
 
 /* Glitch hit — sharp noise burst */
+let _lastGlitch = 0;
 function soundGlitch() {
   if (!audioCtx || !audioEnabled) return;
+  const now = Date.now();
+  if (now - _lastGlitch < 80) return;
+  _lastGlitch = now;
   const g = audioCtx.createGain();
   g.gain.setValueAtTime(0.3, audioCtx.currentTime);
   g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
@@ -268,14 +274,16 @@ function soundSecretEnding() {
   g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 4);
   g.connect(audioCtx.destination);
 
-  for (let i = 0; i < 4; i++) {
+  // Tritone + minor second intervals — unsettling, not triumphant
+  const secretFreqs = [220, 311, 370, 233];
+  secretFreqs.forEach((freq, i) => {
     const osc = audioCtx.createOscillator();
     osc.type = 'sine';
-    osc.frequency.value = 440 * Math.pow(2, i / 12);
+    osc.frequency.value = freq;
     osc.connect(g);
-    osc.start(audioCtx.currentTime + i * 0.15);
+    osc.start(audioCtx.currentTime + i * 0.2);
     osc.stop(audioCtx.currentTime + 4);
-  }
+  });
 }
 
 /* Color shift — quick frequency sweep */
@@ -390,7 +398,7 @@ function injectAudioToggle() {
 
   const btn = document.createElement('button');
   btn.id = 'audio-toggle';
-  btn.textContent = '🔇';
+  btn.textContent = '🔊';
   btn.title = 'Toggle sound';
   btn.style.cssText = [
     'position: fixed',
@@ -408,16 +416,19 @@ function injectAudioToggle() {
     'letter-spacing: 0.1em'
   ].join(';');
 
-  let muted = false;
+  let muted = true;
 
   btn.addEventListener('click', () => {
     initAudio();
     muted = !muted;
     if (muted) {
       if (ambientGain) ambientGain.gain.setValueAtTime(0, audioCtx.currentTime);
+      audioEnabled = false;
       btn.textContent = '🔇';
       btn.style.color = '#222';
+      btn.style.borderColor = '#1a1a1a';
     } else {
+      audioEnabled = true;
       if (ambientGain) ambientGain.gain.setValueAtTime(0.06, audioCtx.currentTime);
       else startAmbient();
       btn.textContent = '🔊';
@@ -445,7 +456,7 @@ function soundForEffect(effectName) {
     case 'colorShiftFast': soundGlitch();      break;
     case 'glitchText':     soundGlitch();      break;
     case 'screenInvert':   soundColorShift();  break;
-    case 'hiddenMessage':  soundNPCAppear();   break;
+    case 'hiddenMessage':  soundColorShift();  break;
     case 'asciiPuzzle':    soundClick();       break;
   }
 }

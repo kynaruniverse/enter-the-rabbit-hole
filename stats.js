@@ -55,7 +55,7 @@ function recordPortalPick(portalName) {
   saveStats(stats);
 }
 
-function recordEndingReached(endingType) {
+function recordEndingStats(endingType) {
   const stats = loadStats();
   stats.totalRuns++;
   if (endingType in stats.endings) stats.endings[endingType]++;
@@ -71,6 +71,9 @@ function getStats() { return loadStats(); }
 function renderLandingStats() {
   const el = document.getElementById('landing-stats');
   if (!el) return;
+  // Skip re-render if already rendered this session
+  if (el.dataset.rendered) return;
+  el.dataset.rendered = '1';
   const stats = loadStats();
   const { red, blue, gap, fourth } = stats.portals;
   const total = red + blue + gap + fourth;
@@ -87,6 +90,11 @@ function renderLandingStats() {
     bars.push({ label: '🌀 ???', count: fourth, p: pct(fourth), color: '#9900ff' });
   }
 
+  const endingsReached = Object.values(stats.endings).reduce((a, b) => a + b, 0);
+  const endingsNote = endingsReached > 0
+    ? '  ·  ' + endingsReached + ' ending' + (endingsReached !== 1 ? 's' : '') + ' reached'
+    : '';
+
   el.innerHTML =
     '<p class="stats-title">YOUR PORTAL HISTORY</p>' +
     '<div class="stats-bars">' +
@@ -100,8 +108,8 @@ function renderLandingStats() {
       '</div>'
     ).join('') +
     '</div>' +
-    '<p class="stats-note">' + total + ' total run' + (total !== 1 ? 's' : '') + ' on this device</p>';
-}
+    '<p class="stats-note">' + total + ' total run' + (total !== 1 ? 's' : '') + ' on this device' + endingsNote + '</p>';
+  }
 
 /* ============================================
    RENDER — Ending page 3-stat bar
@@ -154,11 +162,12 @@ function renderEndingStats(endingType) {
       if (!stats.endings.secret && !stats.endings.npcSecret && !stats.endings.konami) {
         gs.textContent = '🐇 Three secret endings exist. Have you found them?';
       } else {
-        gs.textContent = '★ You have found ' +
-          [stats.endings.secret ? 'the path secret' : '',
-           stats.endings.npcSecret ? 'the NPC secret' : '',
-           stats.endings.konami ? 'the back door' : '']
-          .filter(Boolean).join(', ') + '.';
+        const secretsFound = [
+          stats.endings.secret    ? 'The Path Secret'  : '',
+          stats.endings.npcSecret ? 'The NPC Secret'   : '',
+          stats.endings.konami    ? 'The Back Door'    : ''
+        ].filter(Boolean);
+        gs.textContent = '★ You have found: ' + secretsFound.join(', ') + '.';
       }
     }
   }

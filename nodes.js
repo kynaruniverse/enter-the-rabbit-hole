@@ -700,7 +700,7 @@ They change too.
 But three stay constant.`,
     choices: [
       { text: "Curiosity",              next: 36, effect: "glitchShake"   },
-      { text: "I don't know",           next: 38, effect: "colorShiftFast"},
+      { text: "I don't know",           next: 38, effect: "asciiPuzzle"   },
       { text: "I was supposed to",      next: 37, effect: "screenInvert"  }
     ]
   },
@@ -935,10 +935,11 @@ Being observed by something ancient
 and non-judgmental
 is more unsettling than being judged.
 
-It opens two ways forward.`,
+It opens three ways forward.`,
     choices: [
       { text: "Move through the first",  next: 51, effect: "screenInvert"  },
-      { text: "Move through the second", next: 52, effect: "glitchText"    }
+      { text: "Move through the second", next: 52, effect: "glitchText"    },
+      { text: "Stand still and let it observe you", next: 59, effect: "screenInvert" }
     ]
   },
 
@@ -1009,10 +1010,16 @@ Its floor is decisions — compressed,
 laminated, ancient.
 
 A doorway at the far end.
-Just one. Just forward.`,
+
+The floor beneath your feet
+is packed with something.
+Not stone. Not earth.
+
+Decisions.`,
     choices: [
       { text: "Walk to the doorway",    next: 54, effect: "screenInvert"  },
-      { text: "Examine the floor first",next: 55, effect: "glitchShake"   }
+      { text: "Examine the floor first",next: 55, effect: "glitchShake"   },
+      { text: "Look for names in the floor", next: 61, effect: "glitchText" }
     ]
   },
 
@@ -1055,7 +1062,8 @@ It is exactly what it needed to be.
 One final choice.`,
     choices: [
       { text: "Go toward the large thing",  next: 56, effect: "glitchShake"   },
-      { text: "Go toward the quiet thing",  next: 57, effect: "colorShiftFast"}
+      { text: "Go toward the quiet thing",  next: 57, effect: "colorShiftFast"},
+      { text: "Walk to the exact center",   next: 60, effect: "screenInvert"  }
     ]
   },
 

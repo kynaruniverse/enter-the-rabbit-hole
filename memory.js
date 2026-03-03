@@ -12,14 +12,17 @@
 const MEMORY_KEY = 'rh_memory';
 
 const defaultMemory = {
-  visits:        0,
-  name:          null,       // if user ever gives their name
-  endingsFound:  [],         // array of endingType strings
-  firstVisit:    null,       // ISO date string
-  lastVisit:     null,
-  deepestLayer:  0,
-  konamiFound:   false,
-  fourthPortalSeen: false
+  visits:           0,
+  name:             null,
+  endingsFound:     [],
+  firstVisit:       null,
+  lastVisit:        null,
+  deepestLayer:     0,
+  konamiFound:      false,
+  fourthPortalSeen: false,
+  lastEndingType:   null,
+  lastRunDepth:     0,
+  totalLocalRuns:   0
 };
 
 /* ============================================
@@ -48,7 +51,11 @@ function saveMemory(mem) {
 
 function recordVisit() {
   const mem = loadMemory();
-  mem.visits++;
+  // Only increment visit count once per browser session
+  if (!sessionStorage.getItem('rh_visit_counted')) {
+    mem.visits++;
+    sessionStorage.setItem('rh_visit_counted', '1');
+  }
   if (!mem.firstVisit) mem.firstVisit = new Date().toISOString();
   mem.lastVisit = new Date().toISOString();
   saveMemory(mem);
@@ -60,6 +67,19 @@ function recordEndingFound(endingType) {
   if (!mem.endingsFound.includes(endingType)) {
     mem.endingsFound.push(endingType);
   }
+  saveMemory(mem);
+}
+
+function recordEndingReached(endingType) {
+  const mem = loadMemory();
+  mem.lastEndingType = endingType;
+  mem.totalLocalRuns = (mem.totalLocalRuns || 0) + 1;
+  saveMemory(mem);
+}
+
+function recordRunDepth(depth) {
+  const mem = loadMemory();
+  mem.lastRunDepth = depth;
   saveMemory(mem);
 }
 
@@ -117,12 +137,12 @@ function getMemoryMessage(mem) {
 
   if (v >= 6 && v <= 9) {
     const msgs = [
-      '[ stop coming back ]',
-      '[ or don\'t. it prefers you here ]',
-      '[ your path is being remembered ]',
-      '[ the hole is learning you ]'
+      '[ your path is being remembered ]',     // visit 6  (6%4=2 → index 0 with offset)
+      '[ the hole is learning you ]',           // visit 7
+      '[ stop coming back ]',                   // visit 8
+      '[ or don\'t. it prefers you here ]'      // visit 9
     ];
-    return msgs[v % msgs.length];
+    return msgs[(v - 6) % msgs.length];
   }
 
   if (v === 10) return '[ 10 visits. the hole considers you a resident. ]';
@@ -200,7 +220,8 @@ function applyMemoryToLanding() {
 
 function maybePromptName() {
   const mem = loadMemory();
-  if (mem.visits !== 3 || mem.name) return;
+  if (mem.name) return;
+  if (mem.visits < 3 || mem.visits > 6) return;
 
   // Wait until user is on the landing page a moment
   setTimeout(() => {
@@ -293,15 +314,27 @@ function maybePromptName() {
       'font-family: Courier New, monospace',
       'font-size: 0.65rem',
       'letter-spacing: 0.12em',
-      'cursor: pointer'
+      'cursor: pointer',
+      'min-height: 44px',
+      'padding: 10px 8px',
+      'width: 100%'
     ].join(';');
 
     function submit() {
       const val = input.value.trim();
       if (val) setName(val);
       overlay.remove();
-      // Refresh landing memory display
-      applyMemoryToLanding();
+      // Refresh display without re-counting visit
+      const mem = loadMemory();
+      const msg = getMemoryMessage(mem);
+      if (mem.name && mem.visits > 3) {
+        const subtitle = document.querySelector('#landing .subtitle');
+        if (subtitle) subtitle.textContent = 'Choose a portal to begin, ' + mem.name + '...';
+      }
+      if (msg) {
+        const existing = document.getElementById('memory-msg');
+        if (existing) existing.textContent = msg;
+      }
     }
 
     btn.addEventListener('click', submit);
@@ -315,7 +348,26 @@ function maybePromptName() {
     box.appendChild(skip);
     overlay.appendChild(box);
     document.body.appendChild(overlay);
-    setTimeout(() => input.focus(), 200);
+    // iOS requires focus triggered synchronously from a user gesture
+    // We attach it to the first touchstart on the overlay instead
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      overlay.addEventListener('touchstart', () => input.focus(), { once: true });
+    } else {
+      setTimeout(() => input.focus(), 200);
+    }
 
   }, 1500);
+}
+
+/* ============================================
+   CLEAR MEMORY
+   Full reset — can be wired to UI or console
+   ============================================ */
+
+function clearMemory() {
+  try {
+    localStorage.removeItem(MEMORY_KEY);
+    sessionStorage.removeItem('rh_visit_counted');
+  } catch { /* fail silently */ }
 }

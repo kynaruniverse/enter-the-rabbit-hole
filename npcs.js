@@ -29,9 +29,9 @@ const NPC_ROSTER = [
     chance: 0.22,
     // FIX: portrait as array joined with newline — avoids backtick/backslash issues
     portrait: [
-      '  (\\  /)',
-      '  ( o.o)',
-      '  > ^ <'
+      '   (\\ (\\ ',
+      '   ( -.-)  ',
+      '   o_(")(") '
     ].join('\n'),
     color: '#ffffff',
     dialogue: [
@@ -75,10 +75,10 @@ const NPC_ROSTER = [
     name: 'THE CARTOGRAPHER',
     chance: 0.15,
     portrait: [
-      '    .----.',
-      '   | ?  ? |',
-      '   |  __  |',
-      '    `----`'
+      '   .-----.',
+      '  | o   o |',
+      '  |  ___  |',
+      '   .-----.'
     ].join('\n'),
     color: '#00ff99',
     dialogue: [
@@ -138,6 +138,27 @@ const NPC_ROSTER = [
       "the first one is still here",
       "████ left something in layer 3. don't touch it.",
     ]
+  },
+
+  {
+    id: 'first',
+    name: 'THE FIRST',
+    chance: 0.07,
+    portrait: [
+      '  . . . . .',
+      '  .       .',
+      '  . . . . .'
+    ].join('\n'),
+    color: '#444444',
+    dialogue: [
+      "I found the bottom. I stayed.",
+      "You will not remember this encounter. You never do.",
+      "I have watched everyone who came after me. None of them stayed as long.",
+      "The hole didn't exist before I entered it. I made it by falling.",
+      "There is no secret ending. There is only the one I haven't left yet.",
+      "You look like the ones who almost find it. Most of you stop one choice short.",
+      "I tried to leave once. The hole showed me what was outside. I came back.",
+    ]
   }
 
 ];
@@ -151,14 +172,21 @@ const NPC_ROSTER = [
 
 let npcAppearedThisRun = null;
 let npcAppearanceCount = 0;
+let npcSeenThisRun     = new Set();
 
 function getNPCState() {
-  return { npc: npcAppearedThisRun, count: npcAppearanceCount };
+  return {
+    npc:      npcAppearedThisRun,
+    count:    npcAppearanceCount,
+    uniqueSeen: npcSeenThisRun.size,
+    seenIds:  Array.from(npcSeenThisRun)
+  };
 }
 
 function resetNPCState() {
   npcAppearedThisRun = null;
   npcAppearanceCount = 0;
+  npcSeenThisRun     = new Set();
 }
 
 
@@ -173,13 +201,18 @@ function maybeShowNPC(layerNumber) {
   // Don't show on Layer 1 — too early, kills pacing
   if (layerNumber <= 1) return Promise.resolve();
 
-  // Each NPC rolls its own chance independently
-  const candidate = NPC_ROSTER.find(npc => Math.random() < npc.chance);
+  // Weighted independent selection — shuffle first so order doesn't bias results
+  const shuffled = NPC_ROSTER.slice().sort(() => Math.random() - 0.5);
+  const candidate = shuffled.find(npc => Math.random() < npc.chance);
   if (!candidate) return Promise.resolve();
+
+  // Don't show the same NPC twice in a row
+  if (candidate.id === npcAppearedThisRun && Math.random() < 0.8) return Promise.resolve();
 
   // Track state for secret ending detection
   npcAppearedThisRun = candidate.id;
   npcAppearanceCount++;
+  npcSeenThisRun.add(candidate.id);
 
   // Pick a random dialogue line
   const line = candidate.dialogue[
@@ -293,9 +326,15 @@ function showNPCModal(npc, line) {
     document.body.appendChild(overlay);
 
     // --- Typewriter ---
-    typewriterEffect(dialogue, line, 36, () => {
+    // Short lines: show hint immediately after typing; long lines: normal flow
+    const speed = npc.id === 'static' ? 80 : 36;
+    typewriterEffect(dialogue, line, speed, () => {
       hint.style.opacity = '1';
     });
+    // For very short STATIC lines, show hint almost immediately
+    if (npc.id === 'static' && line.length < 20) {
+      setTimeout(() => { hint.style.opacity = '1'; }, 1200);
+    }
 
     // --- Dismiss logic ---
     // Short delay before dismissable so no accidental instant-skip
@@ -312,6 +351,7 @@ function showNPCModal(npc, line) {
     }
 
     overlay.addEventListener('click', dismiss);
+    overlay.addEventListener('touchend', (e) => { e.preventDefault(); dismiss(); });
 
     // Safety auto-dismiss — never blocks the game
     setTimeout(dismiss, 12000);
@@ -331,6 +371,10 @@ function typewriterEffect(el, text, speed, onComplete) {
   function tick() {
     if (i < text.length) {
       el.textContent += text[i];
+      // Tick sound every 4th character
+      if (i % 4 === 0 && typeof soundTypewriter === 'function') {
+        soundTypewriter();
+      }
       i++;
       setTimeout(tick, speed);
     } else if (onComplete) {

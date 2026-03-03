@@ -121,6 +121,7 @@ const JOURNAL_ENTRIES = [
    ============================================ */
 
 function showJournal() {
+  if (typeof getMemory !== 'function') return;
   const mem      = getMemory();
   const found    = mem.endingsFound || [];
   const total    = JOURNAL_ENTRIES.length;
@@ -142,9 +143,10 @@ function showJournal() {
   ].join(';');
 
   // Header
+  const isMobileHeader = window.matchMedia('(pointer: coarse)').matches;
   const header = document.createElement('div');
   header.style.cssText = [
-    'padding: 28px 24px 16px',
+    'padding: ' + (isMobileHeader ? '20px 16px 14px' : '28px 24px 16px'),
     'border-bottom: 1px solid #1a1a1a',
     'position: sticky',
     'top: 0',
@@ -213,18 +215,35 @@ function showJournal() {
   header.appendChild(track);
 
   // Entries
+  const isMobile = window.matchMedia('(pointer: coarse)').matches;
   const list = document.createElement('div');
   list.style.cssText = [
-    'padding: 16px 24px 40px',
+    'padding: ' + (isMobile ? '12px 16px 60px' : '16px 24px 40px'),
     'display: flex',
     'flex-direction: column',
-    'gap: 12px',
+    'gap: ' + (isMobile ? '10px' : '12px'),
     'max-width: 640px',
     'width: 100%',
     'margin: 0 auto'
   ].join(';');
 
+  let secretDividerAdded = false;
   JOURNAL_ENTRIES.forEach(entry => {
+    // Insert divider before first secret entry
+    if (entry.isSecret && !secretDividerAdded) {
+      secretDividerAdded = true;
+      const divider = document.createElement('div');
+      divider.style.cssText = [
+        'border-top: 1px solid #0d0d0d',
+        'padding-top: 14px',
+        'font-size: 0.52rem',
+        'color: #1a1a1a',
+        'letter-spacing: 0.2em'
+      ].join(';');
+      divider.textContent = '[ ??? — CLASSIFIED ENTRIES ]';
+      list.appendChild(divider);
+    }
+
     const isFound = found.includes(entry.endingType);
     const card    = document.createElement('div');
 
@@ -235,18 +254,23 @@ function showJournal() {
     ].join(';');
 
     if (isFound) {
-      card.addEventListener('mouseover', () => card.style.borderColor = '#333');
-      card.addEventListener('mouseout',  () => card.style.borderColor = '#222');
+      card.addEventListener('mouseover',  () => card.style.borderColor = '#333');
+      card.addEventListener('mouseout',   () => card.style.borderColor = '#222');
+      card.addEventListener('touchstart', () => card.style.borderColor = '#444', { passive: true });
+      card.addEventListener('touchend',   () => {
+        setTimeout(() => card.style.borderColor = '#222', 300);
+      }, { passive: true });
     }
 
+    const onMobile = window.matchMedia('(pointer: coarse)').matches;
     const cardTitle = document.createElement('p');
     cardTitle.style.cssText = [
-      'font-size: 0.75rem',
+      'font-size: ' + (onMobile ? '0.85rem' : '0.75rem'),
       'letter-spacing: 0.15em',
       'margin-bottom: 4px',
       'color: ' + (isFound ? (entry.isSecret ? '#00ff99' : '#ffffff') : '#1a1a1a')
     ].join(';');
-    cardTitle.textContent = isFound ? entry.title : '█ '.repeat(Math.ceil(entry.title.length / 2));
+    cardTitle.textContent = isFound ? entry.title : '█'.repeat(entry.title.length).replace(/(.{4})/g, '$1 ').trim();
 
     const cardLayer = document.createElement('p');
     cardLayer.style.cssText = [
@@ -259,9 +283,9 @@ function showJournal() {
 
     const cardDesc = document.createElement('p');
     cardDesc.style.cssText = [
-      'font-size: 0.75rem',
+      'font-size: ' + (onMobile ? '0.82rem' : '0.75rem'),
       'color: ' + (isFound ? '#666' : '#151515'),
-      'line-height: 1.6',
+      'line-height: 1.7',
       'letter-spacing: 0.03em'
     ].join(';');
     cardDesc.textContent = isFound
@@ -274,9 +298,83 @@ function showJournal() {
     list.appendChild(card);
   });
 
+  // Mobile swipe-down to close
+  const onMobileSwipe = window.matchMedia('(pointer: coarse)').matches;
+  if (onMobileSwipe) {
+    // Visual drag handle at top
+    const handle = document.createElement('div');
+    handle.style.cssText = [
+      'width: 36px',
+      'height: 3px',
+      'background: #222',
+      'border-radius: 2px',
+      'margin: 10px auto 0',
+      'flex-shrink: 0'
+    ].join(';');
+    overlay.insertBefore(handle, overlay.firstChild);
+
+    // Swipe detection
+    let touchStartY = 0;
+    overlay.addEventListener('touchstart', e => {
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+    overlay.addEventListener('touchmove', e => {
+      const delta = e.touches[0].clientY - touchStartY;
+      if (delta > 0 && overlay.scrollTop === 0) {
+        overlay.style.transform = 'translateY(' + Math.min(delta * 0.4, 80) + 'px)';
+        overlay.style.transition = 'none';
+      }
+    }, { passive: true });
+    overlay.addEventListener('touchend', e => {
+      const delta = e.changedTouches[0].clientY - touchStartY;
+      overlay.style.transition = 'transform 0.2s ease';
+      if (delta > 80 && overlay.scrollTop === 0) {
+        overlay.style.transform = 'translateY(100%)';
+        setTimeout(() => overlay.remove(), 220);
+      } else {
+        overlay.style.transform = 'translateY(0)';
+      }
+    }, { passive: true });
+  }
+
+  // Bottom close button — big tap target for mobile
+  const bottomClose = document.createElement('button');
+  bottomClose.textContent = '[ CLOSE JOURNAL ]';
+  bottomClose.style.cssText = [
+    'display: block',
+    'width: calc(100% - 32px)',
+    'margin: 0 16px 32px',
+    'padding: 16px',
+    'background: transparent',
+    'border: 1px solid #1a1a1a',
+    'color: #333',
+    'font-family: Courier New, monospace',
+    'font-size: 0.7rem',
+    'letter-spacing: 0.15em',
+    'cursor: pointer',
+    'min-height: 44px'
+  ].join(';');
+  bottomClose.addEventListener('click', () => overlay.remove());
+  bottomClose.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    overlay.remove();
+  });
+  list.appendChild(bottomClose);
+
   overlay.appendChild(header);
   overlay.appendChild(list);
   document.body.appendChild(overlay);
+  overlay.scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+
+  // Restore scroll when journal closes
+  const origClose = closeBtn.onclick;
+  function closeAndRestore() {
+    document.body.style.overflow = '';
+    overlay.remove();
+  }
+  closeBtn.removeEventListener('click', () => overlay.remove());
+  closeBtn.addEventListener('click', closeAndRestore);
 }
 
 /* ============================================
@@ -288,7 +386,15 @@ function injectJournalButton() {
 
   const btn = document.createElement('button');
   btn.id = 'journal-btn';
-  btn.textContent = '📖 Journal';
+
+  function updateJournalBtnLabel() {
+    if (typeof getMemory !== 'function') { btn.textContent = '[ J ] Journal'; return; }
+    const found = (getMemory().endingsFound || []).length;
+    btn.textContent = '[ J ] Journal  ' + found + '/16';
+  }
+  updateJournalBtnLabel();
+  window._updateJournalBtn = updateJournalBtnLabel;
+  const isMobileDevice = window.matchMedia('(pointer: coarse)').matches;
   btn.style.cssText = [
     'position: fixed',
     'bottom: 20px',
@@ -297,11 +403,15 @@ function injectJournalButton() {
     'border: 1px solid #1a1a1a',
     'color: #333',
     'font-family: Courier New, monospace',
-    'font-size: 0.65rem',
+    'font-size: ' + (isMobileDevice ? '0.75rem' : '0.65rem'),
     'letter-spacing: 0.12em',
-    'padding: 8px 14px',
+    'padding: ' + (isMobileDevice ? '12px 18px' : '8px 14px'),
     'cursor: pointer',
     'z-index: 500',
+    'min-height: 44px',
+    'min-width: 44px',
+    'display: flex',
+    'align-items: center',
     'transition: border-color 0.2s, color 0.2s'
   ].join(';');
 
@@ -318,11 +428,15 @@ function injectJournalButton() {
   document.body.appendChild(btn);
 }
 
-/* Press J to open journal anywhere */
+/* Press J to open journal anywhere, Escape to close */
 document.addEventListener('keydown', e => {
   if (e.key === 'j' || e.key === 'J') {
     const overlay = document.getElementById('journal-overlay');
     if (overlay) overlay.remove();
     else showJournal();
+  }
+  if (e.key === 'Escape') {
+    const overlay = document.getElementById('journal-overlay');
+    if (overlay) overlay.remove();
   }
 });

@@ -16,17 +16,140 @@
 /* ============================================
    SKIP on touch-only devices + reduced motion
    ============================================ */
-const isTouchOnly = window.matchMedia('(pointer: coarse)').matches;
+const isTouchOnly    = window.matchMedia('(pointer: coarse)').matches;
 const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-if (isTouchOnly || prefersReduced) {
-  // Don't run cursor on mobile / reduced motion
-  // Export no-op stubs so script.js calls don't error
+
+if (prefersReduced) {
   window.cursorReactNPC    = () => {};
   window.cursorReactEnding = () => {};
   window.cursorReactSecret = () => {};
+} else if (isTouchOnly) {
+  initTouchFeedback();
 } else {
   initCursor();
 }
+
+/* ============================================
+   TOUCH FEEDBACK — mobile equivalent of cursor
+   Tap bursts, NPC flash, ending reactions.
+   No cursor element — uses overlay toasts
+   and touch-point particle bursts instead.
+   ============================================ */
+
+function initTouchFeedback() {
+
+  /* ---- Touch burst on tap ---- */
+  document.addEventListener('touchstart', e => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    spawnTouchBurst(touch.clientX, touch.clientY, '#ffffff', 5);
+  }, { passive: true });
+
+  /* ---- Spawn burst particles at touch point ---- */
+  function spawnTouchBurst(x, y, color, count) {
+    for (let i = 0; i < count; i++) {
+      const p   = document.createElement('div');
+      const ang = (Math.PI * 2 * i) / count + Math.random() * 0.8;
+      const dist = 15 + Math.random() * 25;
+      const tx  = Math.cos(ang) * dist;
+      const ty  = Math.sin(ang) * dist;
+
+      p.style.cssText = [
+        'position: fixed',
+        'top: 0',
+        'left: 0',
+        'width: 4px',
+        'height: 4px',
+        'background: ' + color,
+        'pointer-events: none',
+        'z-index: 99997',
+        'border-radius: 50%',
+        'transform: translate(' + (x - 2) + 'px, ' + (y - 2) + 'px)',
+        'transition: transform 0.5s ease-out, opacity 0.5s ease-out',
+        'opacity: 0.7'
+      ].join(';');
+
+      document.body.appendChild(p);
+
+      requestAnimationFrame(() => {
+        p.style.transform = 'translate(' + (x + tx - 2) + 'px, ' + (y + ty - 2) + 'px)';
+        p.style.opacity   = '0';
+      });
+
+      setTimeout(() => p.remove(), 550);
+    }
+  }
+
+  /* ---- Toast overlay — replaces cursor face changes ---- */
+  function showToast(text, color, duration) {
+    const existing = document.getElementById('rh-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'rh-toast';
+    toast.textContent = text;
+    toast.style.cssText = [
+      'position: fixed',
+      'top: 20px',
+      'left: 50%',
+      'transform: translateX(-50%)',
+      'font-family: Courier New, monospace',
+      'font-size: 0.65rem',
+      'color: ' + color,
+      'letter-spacing: 0.2em',
+      'pointer-events: none',
+      'z-index: 99999',
+      'opacity: 0',
+      'transition: opacity 0.3s',
+      'text-shadow: 0 0 10px ' + color,
+      'white-space: nowrap'
+    ].join(';');
+
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => { toast.style.opacity = '1'; });
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 350);
+    }, duration || 1200);
+  }
+
+  /* ---- Game event reactions ---- */
+
+  // NPC appears — brief eerie flash on screen edge
+  window.cursorReactNPC = function() {
+    showToast('O.O', '#aaaaff', 1200);
+    // Flash the screen border briefly
+    const flash = document.createElement('div');
+    flash.style.cssText = [
+      'position: fixed',
+      'inset: 0',
+      'border: 1px solid rgba(170,170,255,0.15)',
+      'pointer-events: none',
+      'z-index: 99998',
+      'opacity: 1',
+      'transition: opacity 0.8s'
+    ].join(';');
+    document.body.appendChild(flash);
+    setTimeout(() => { flash.style.opacity = '0'; }, 100);
+    setTimeout(() => flash.remove(), 950);
+  };
+
+  // Normal ending — dim toast
+  window.cursorReactEnding = function() {
+    showToast('-.-', '#444444', 2000);
+  };
+
+  // Secret ending — green burst from center of screen
+  window.cursorReactSecret = function() {
+    showToast('*.*', '#00ff99', 2500);
+    const cx = window.innerWidth  / 2;
+    const cy = window.innerHeight / 2;
+    spawnTouchBurst(cx, cy, '#00ff99', 16);
+    // Second wave
+    setTimeout(() => spawnTouchBurst(cx, cy, '#00ff99', 10), 200);
+  };
+
+} // end initTouchFeedback
 
 function initCursor() {
 
@@ -162,19 +285,30 @@ function initCursor() {
   /* ============================================
      HOVER REACTION — buttons get a highlight
      ============================================ */
+  function resetCursor() {
+    inner.textContent      = '>.<';
+    inner.style.color      = '#ffffff';
+    inner.style.textShadow = '0 0 6px rgba(255,255,255,0.4)';
+  }
+
   document.addEventListener('mouseover', e => {
     const isBtn = e.target.tagName === 'BUTTON' ||
                   e.target.tagName === 'A'       ||
                   e.target.tagName === 'INPUT';
     if (isBtn) {
-      inner.textContent  = '>^<';
-      inner.style.color  = '#00ff99';
+      inner.textContent      = '>^<';
+      inner.style.color      = '#00ff99';
       inner.style.textShadow = '0 0 8px rgba(0,255,153,0.6)';
     } else {
-      inner.textContent  = '>.<';
-      inner.style.color  = '#ffffff';
-      inner.style.textShadow = '0 0 6px rgba(255,255,255,0.4)';
+      resetCursor();
     }
+  });
+
+  document.addEventListener('mouseout', e => {
+    const isBtn = e.target.tagName === 'BUTTON' ||
+                  e.target.tagName === 'A'       ||
+                  e.target.tagName === 'INPUT';
+    if (isBtn) resetCursor();
   });
 
   /* ============================================

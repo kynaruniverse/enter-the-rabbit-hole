@@ -2,24 +2,58 @@
   "name": "Enter the Rabbit Hole",
   "short_name": "Rabbit Hole",
   "description": "A surreal interactive experience. Choose your portal. There is no going back.",
+  "id": "/enter-the-rabbit-hole/",
   "start_url": "/enter-the-rabbit-hole/",
+  "scope": "/enter-the-rabbit-hole/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "orientation": "portrait",
   "background_color": "#000000",
   "theme_color": "#000000",
   "lang": "en",
+  "dir": "ltr",
+  "categories": ["games", "entertainment"],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Enter Now",
+      "short_name": "Enter",
+      "description": "Go straight to the portals",
+      "url": "/enter-the-rabbit-hole/",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Ending Journal",
+      "short_name": "Journal",
+      "description": "Check your endings found",
+      "url": "/enter-the-rabbit-hole/about.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
   "icons": [
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

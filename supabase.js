@@ -69,7 +69,6 @@ async function _insert(table, data) {
       body:    JSON.stringify(data)
     });
     if (!res.ok) console.warn('[RH:Supabase] insert error', await res.text());
-    if (res.ok) console.log('[RH:Supabase] ✓ inserted into', table);
     return res.ok;
   } catch (e) {
     console.warn('[RH:Supabase] network error', e.message);
@@ -97,7 +96,11 @@ async function _select(table, qs) {
    ============================================ */
 
 /** Call when a portal is chosen (a run starts) */
+let _lastRunRecord = 0;
 async function globalRecordRun(portal) {
+  const now = Date.now();
+  if (now - _lastRunRecord < 3000) return false; // throttle: one run per 3s max
+  _lastRunRecord = now;
   return _insert('runs', {
     portal:     portal,
     session_id: _sessionId
@@ -254,69 +257,16 @@ async function renderGlobalStatsBlock(containerEl) {
       'letter-spacing: 0.1em',
       'font-family: Courier New, monospace'
     ].join(';');
-    const d = new Date(stats.updated_at);
-    ts.textContent = 'updated ' + d.toLocaleTimeString();
+    const d    = new Date(stats.updated_at);
+    const now  = new Date();
+    const isToday = d.toDateString() === now.toDateString();
+    ts.textContent = isToday
+      ? 'updated ' + d.toLocaleTimeString()
+      : 'updated ' + d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
     table.appendChild(ts);
   }
 
   containerEl.appendChild(table);
 }
 
-/* ============================================
-   ABOUT PAGE STATS — larger display
-   Called from about.html inline script
-   ============================================ */
-async function populateAboutStats() {
-  const stats = await getGlobalStats();
 
-  function set(id, val) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val;
-  }
-
-  if (!stats) {
-    // Supabase not configured — show local fallback
-    const localStats = (() => {
-      try { return JSON.parse(localStorage.getItem('rh_stats')) || {}; } catch { return {}; }
-    })();
-    set('gs-total',  (localStats.totalRuns || 0).toLocaleString());
-    set('gs-secret', '???');
-    set('gs-konami', '???');
-    set('gs-last',   '—');
-    return;
-  }
-
-  const totalRuns  = stats.total_runs || 0;
-  const pTotal     = (stats.portal_red    || 0) +
-                     (stats.portal_blue   || 0) +
-                     (stats.portal_gap    || 0) +
-                     (stats.portal_fourth || 0);
-  const pct = n => pTotal > 0 ? Math.round((n / pTotal) * 100) : 0;
-
-  set('gs-total',   totalRuns.toLocaleString());
-  set('gs-secret',  (stats.secret_endings_found || 0).toLocaleString());
-  set('gs-konami',  (stats.konami_found || 0).toLocaleString());
-
-  const endingLabel = {
-    survived:'YOU SURVIVED', consumed:'CONSUMED', supposed:'WERE SUPPOSED TO',
-    alone:'THE ONLY ONE', waited:'THE WAITER', floor:'FLOOR OF DECISIONS',
-    looping:'THE LOOP', quiet:'THE QUIET THING', leaving:'THE LEAVING',
-    observer:'THE OBSERVER', hollow:'THE HOLLOW', named:'ON THE LIST',
-    free:'ESCAPE', npcSecret:'[ CLASSIFIED ]', secret:'< CLASSIFIED >',
-    konami:'THE BACK DOOR'
-  };
-  set('gs-last', stats.last_ending_type
-    ? (endingLabel[stats.last_ending_type] || stats.last_ending_type)
-    : '—');
-
-  set('gs-red',    pct(stats.portal_red   || 0) + '%');
-  set('gs-blue',   pct(stats.portal_blue  || 0) + '%');
-  set('gs-gap',    pct(stats.portal_gap   || 0) + '%');
-  set('gs-fourth', pct(stats.portal_fourth || 0) + '%');
-
-  // Show fourth portal stat only if it's been seen
-  const fourthRow = document.getElementById('gs-fourth-row');
-  if (fourthRow) {
-    fourthRow.style.display = (stats.portal_fourth || 0) > 0 ? '' : 'none';
-  }
-}

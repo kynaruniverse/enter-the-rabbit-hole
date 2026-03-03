@@ -7,7 +7,7 @@
   <title>Enter the Rabbit Hole</title>
   <meta name="description" content="A surreal interactive experience. 16 endings. One secret. Thousands have entered. Most never find the bottom." />
 
-  <meta property="og:title"        content="Enter the Rabbit Hole" />
+  <meta property="og:title"        content="Enter the Rabbit Hole — Stats &amp; Endings" />
   <meta property="og:description"  content="A surreal interactive experience. 16 endings. One secret. Most never find the bottom." />
   <meta property="og:type"         content="website" />
   <meta property="og:image"        content="https://kynaruniverse.github.io/enter-the-rabbit-hole/preview.png" />
@@ -456,6 +456,12 @@
       .stat-number { font-size: 1.2rem; }
       .endings-grid { grid-template-columns: repeat(3, 1fr); }
     }
+
+    @media (max-width: 340px) {
+      .endings-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-hero { grid-template-columns: repeat(3, 1fr); }
+      .stat-number { font-size: 1rem; }
+    }
   </style>
 </head>
 <body>
@@ -542,7 +548,7 @@
        ENDINGS GRID — local found
        ============================ -->
   <div class="endings-section">
-    <p class="endings-label">[ YOUR ENDINGS FOUND ]</p>
+    <p class="endings-label">[ YOUR ENDINGS FOUND — <span id="endings-count">0 / 16</span> ]</p>
     <div class="endings-grid" id="endings-grid"></div>
   </div>
 
@@ -553,6 +559,23 @@
     <p class="last-ending-label">[ LAST ENDING REACHED ]</p>
     <p id="last-ending-global">globally: —</p>
     <p id="last-ending-local">on this device: no record</p>
+  </div>
+  
+  <!-- ============================
+       LORE TEASER
+       ============================ -->
+  <div class="teaser" style="border: 1px solid #0d0d0d; padding: 18px 20px; margin-bottom: 36px;">
+    <p class="hi" style="font-size: 0.7rem; color: #222; letter-spacing: 0.12em; margin-bottom: 10px;">[ FRAGMENTS FROM INSIDE ]</p>
+    <p style="font-size: 0.72rem; color: #1a1a1a; line-height: 1.9; letter-spacing: 0.05em; margin-bottom: 10px;">
+      The first person who entered never came back. Not because they couldn't.
+      Because they didn't want to. They left something behind in Layer 3 —
+      a half-finished thought. Something grew from it.
+    </p>
+    <p style="font-size: 0.65rem; color: #111; letter-spacing: 0.1em;">
+      [ the secret path requires patience and specific choices ]<br>
+      [ most who find it believe it was an accident ]<br>
+      [ it was not ]
+    </p>
   </div>
 
   <!-- ============================
@@ -586,7 +609,7 @@ const SB_READY = SB_URL && !SB_URL.startsWith('YOUR_');
 const ENDING_NAMES = {
   survived:  'YOU SURVIVED',
   consumed:  'CONSUMED',
-  supposed:  'WERE SUPPOSED TO',
+  supposed:  'YOU WERE SUPPOSED TO',
   alone:     'THE ONLY ONE',
   waited:    'THE WAITER',
   floor:     'FLOOR OF DECISIONS',
@@ -713,9 +736,12 @@ function renderLastEnding(gs) {
   }
 
   if (found.length > 0) {
-    const last = found[found.length - 1];
+    const last      = found[found.length - 1];
+    const lastVisit = memory.lastVisit
+      ? ' — ' + new Date(memory.lastVisit).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+      : '';
     document.getElementById('last-ending-local').textContent =
-      'on this device: ' + (ENDING_NAMES[last] || last);
+      'on this device: ' + (ENDING_NAMES[last] || last) + lastVisit;
   }
 }
 
@@ -725,6 +751,8 @@ function renderEndingsGrid() {
   const found  = memory.endingsFound || [];
   const grid   = document.getElementById('endings-grid');
   const allKeys = Object.keys(ENDING_NAMES);
+  
+  document.getElementById('endings-count').textContent = found.length + ' / 16';
 
   grid.innerHTML = allKeys.map(type => {
     const isFound  = found.includes(type);
@@ -794,5 +822,13 @@ function startTicker(gs) {
 })();
 </script>
 
+<noscript>
+  <style>
+    .stats-hero, .global-table, .endings-section, .last-ending-box, .ticker { display: none; }
+  </style>
+  <p style="font-family: 'Courier New', monospace; color: #333; font-size: 0.75rem; letter-spacing: 0.12em; text-align: center; padding: 20px;">
+    [ javascript required to load player stats ]
+  </p>
+</noscript>
 </body>
 </html>

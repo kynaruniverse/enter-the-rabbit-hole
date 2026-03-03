@@ -326,6 +326,7 @@ function showLanding() {
   }
 
   runStartTime = null;
+  ambientSuppressed = false;
   applyMemoryToLanding();
   maybePromptName();
   renderLandingStats();
@@ -396,9 +397,11 @@ function _renderEnding(node) {
   const code = generateEndingCode(node.endingType, nodeHistory);
 
   // Local record
-  recordEndingReached(node.endingType);
+  recordEndingReached(node.endingType);   // memory.js — saves lastEndingType, totalLocalRuns
+  recordEndingStats(node.endingType);     // stats.js  — saves endings count, totalRuns
   recordEndingFound(node.endingType);
   if (node.endingType === 'konami') recordKonamiFound();
+  if (typeof window._updateJournalBtn === 'function') window._updateJournalBtn();
 
   // Global record (async — fire and forget)
   if (typeof globalRecordEnding === 'function') {
@@ -1100,3 +1103,38 @@ function createTimerEl() {
    INIT
    ============================================ */
 showLanding();
+
+
+/* SW update notification — prompt soft reload */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data !== 'SW_UPDATED') return;
+    // Only show if user is on the landing page, not mid-game
+    if (document.getElementById('landing') &&
+        !document.getElementById('landing').classList.contains('hidden')) {
+      const el = document.createElement('p');
+      el.textContent = '[ new version available — refresh to update ]';
+      el.style.cssText = [
+        'position: fixed',
+        'bottom: 70px',
+        'left: 50%',
+        'transform: translateX(-50%)',
+        'font-family: Courier New, monospace',
+        'font-size: 0.6rem',
+        'color: #00ff99',
+        'letter-spacing: 0.15em',
+        'pointer-events: none',
+        'z-index: 600',
+        'white-space: nowrap',
+        'opacity: 0',
+        'transition: opacity 0.5s'
+      ].join(';');
+      document.body.appendChild(el);
+      setTimeout(() => { el.style.opacity = '1'; }, 100);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 600);
+      }, 5000);
+    }
+  });
+}

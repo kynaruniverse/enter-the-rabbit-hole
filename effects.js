@@ -99,15 +99,34 @@ const Effects = {
   /* ---------- 6. HIDDEN MESSAGE ----------
      A secret message fades in over the screen */
   hiddenMessage() {
-    const messages = [
+    const shallowMessages = [
       "IT KNOWS YOU'RE HERE",
       "YOU WERE ALWAYS GOING TO CLICK THAT",
       "THE OTHER PATHS LEAD TO THE SAME PLACE",
       "DON'T LOOK BEHIND YOU",
       "YOU HAVE BEEN HERE BEFORE",
-      "THIS IS NOT A GAME"
+      "THIS IS NOT A GAME",
+      "EVERY CHOICE WAS RECORDED",
+      "SOMETHING FOLLOWED YOU IN",
+      "THE HOLE WAS WAITING FOR YOU SPECIFICALLY"
     ];
-    const msg = messages[Math.floor(Math.random() * messages.length)];
+    const deepMessages = [
+      "YOU ARE PAST THE POINT OF TURNING BACK",
+      "THE FIRST ONE NEVER LEFT",
+      "YOUR PATH IS BEING REMEMBERED",
+      "LAYER 4 DOES NOT EXIST ON ANY MAP",
+      "SOMETHING IN HERE IS OLDER THAN THE HOLE",
+      "YOU LOOK LIKE THE ONES WHO ALMOST FIND IT"
+    ];
+
+    // Use deep messages in layers 4+ if we can detect depth
+    const layerEl = document.getElementById('layer-label');
+    const layerNum = layerEl
+      ? parseInt(layerEl.textContent.replace(/\D/g, '')) || 1
+      : 1;
+
+    const pool = layerNum >= 4 ? deepMessages : shallowMessages;
+    const msg  = pool[Math.floor(Math.random() * pool.length)];
     showFloatingMessage(msg, 2000);
   },
 
@@ -118,7 +137,7 @@ const Effects = {
     return new Promise((resolve) => {
       const puzzles = [
         { prompt: "TYPE THE WORD THAT IS MISSING:\nR _ B B I T", answer: "RABBIT" },
-        { prompt: "DECODE THIS:\n82 65 84 32 72 79 76 69 → TYPE IT", answer: "RAT HOLE" },
+        { prompt: "DECODE THIS:\n82 65 84 32 72 79 76 69 → TYPE IT\n[ spaces count ]", answer: "RAT HOLE" },
         { prompt: "WHAT AM I?\nI have layers but no onion.\nI have depth but no water.\nI have no end.", answer: "RABBIT HOLE" }
       ];
       const puzzle = puzzles[Math.floor(Math.random() * puzzles.length)];
@@ -157,7 +176,11 @@ function corruptText(str, intensity = 0.3) {
 
 /* Flash a full-screen color overlay */
 function flashOverlay(color, opacity, duration) {
+  // Limit concurrent overlays to avoid DOM flooding on rapid clicks
+  const existing = document.querySelectorAll('.rh-flash-overlay');
+  if (existing.length >= 3) return;
   const overlay = document.createElement('div');
+  overlay.className = 'rh-flash-overlay';
   overlay.style.cssText = `
     position: fixed;
     inset: 0;
@@ -194,6 +217,9 @@ function showFloatingMessage(text, duration = 2000) {
     text-shadow: 0 0 10px #00ff99, 0 0 20px #00ff99;
     animation: floatMsgAnim ${duration}ms ease forwards;
     white-space: nowrap;
+    max-width: 90vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
   `;
   document.body.appendChild(msg);
   setTimeout(() => msg.remove(), duration);
@@ -243,6 +269,7 @@ function showPuzzleModal(promptText, correctAnswer, onSuccess) {
   const input = document.createElement('input');
   input.type = 'text';
   input.placeholder = 'TYPE YOUR ANSWER...';
+  input.maxLength = 60;
   input.style.cssText = `
     width: 100%;
     padding: 12px;
